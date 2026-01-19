@@ -1,0 +1,21 @@
+import { api } from '@/lib/api'
+import { useQuery } from '@tanstack/react-query'
+import { User } from '../users/types'
+
+export const keys = {
+  groups: 'groups',
+}
+
+export const useGroups = () => {
+  return useQuery({
+    queryKey: [keys.groups],
+    queryFn: () => api.getGroups(),
+  })
+}
+
+export const useGroupBalances = (user: User, month: number, year: number) => {
+  return useQuery({
+    queryKey: [keys.groups, user.id, month, year],
+    queryFn: () => api.getGroupBalances(user, month, year),
+  })
+}
