@@ -1,6 +1,6 @@
-import { api } from '@/lib/api'
 import { useQuery } from '@tanstack/react-query'
-import { User } from '../users/types'
+import type { User } from '@/features/users/types'
+import { api } from '@/lib/api'
 
 export const keys = {
   groups: 'groups',

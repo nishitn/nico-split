@@ -1,16 +1,18 @@
-import { Account } from '@/features/accounts/types'
-import { Category, CategoryStats } from '@/features/categories/types'
-import { Chapter } from '@/features/chapters/types'
-import { Group, GroupBalance } from '@/features/groups/types'
-import {
+import type { Account } from '@/features/accounts/types'
+import type { Category, CategoryStats } from '@/features/categories/types'
+import type { Chapter } from '@/features/chapters/types'
+import type { Group, GroupBalance } from '@/features/groups/types'
+import type {
   GroupSplitMetadata,
-  GroupTransactionType,
   GroupTransferMetadata,
   MonthlyStats,
   Transaction,
+} from '@/features/transactions/types'
+import {
+  GroupTransactionType,
   TransactionScope,
 } from '@/features/transactions/types'
-import { User } from '@/features/users/types'
+import type { User } from '@/features/users/types'
 import {
   mockAccounts,
   mockCategories,
@@ -18,8 +20,8 @@ import {
   mockGroups,
   mockTransactions,
   mockUsers,
-} from './mock-data'
-import { getSettlement, getUserAmounts, getUserOwes } from './utils'
+} from '@/lib/mock-data'
+import { getSettlement, getUserAmounts, getUserOwes } from '@/lib/utils'
 
 const DELAY = 150
 
@@ -217,7 +219,7 @@ export const api = {
       const subCatSum = cat.subCategories
         .map((subCatId) => {
           const subCat = mockCategories.find((cat) => cat.id === subCatId)
-          return getAmountForCategory(subCat!!)
+          return getAmountForCategory(subCat!)
         })
         .reduce((acc, amount) => {
           acc += amount

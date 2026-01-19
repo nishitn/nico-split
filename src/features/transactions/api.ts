@@ -1,6 +1,6 @@
-import { User } from '@/features/users/types'
-import { api } from '@/lib/api'
 import { useQuery } from '@tanstack/react-query'
+import type { User } from '@/features/users/types'
+import { api } from '@/lib/api'
 
 export const keys = {
   transactions: 'transactions',

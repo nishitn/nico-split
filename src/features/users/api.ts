@@ -1,12 +1,12 @@
+import { useSuspenseQuery } from '@tanstack/react-query'
 import { api } from '@/lib/api'
-import { useQuery } from '@tanstack/react-query'
 
 export const keys = {
   users: 'users',
 }
 
 export const useCurrentUser = () => {
-  return useQuery({
+  return useSuspenseQuery({
     queryKey: [keys.users],
     queryFn: () => api.getCurrentUser(),
   })

@@ -1,17 +1,19 @@
-import {
+import {  clsx } from 'clsx'
+import { twMerge } from 'tailwind-merge'
+import type {ClassValue} from 'clsx';
+import type {
   GroupSplitMetadata,
-  GroupTransactionType,
   GroupTransferMetadata,
+  Transaction} from '@/features/transactions/types';
+import type { User } from '@/features/users/types'
+import {
+  GroupTransactionType,
   PersonalTransactionType,
-  Transaction,
   TransactionScope,
 } from '@/features/transactions/types'
-import { User } from '@/features/users/types'
-import { clsx, type ClassValue } from 'clsx'
-import { twMerge } from 'tailwind-merge'
 
 // UI Helpers
-export function cn(...inputs: ClassValue[]) {
+export function cn(...inputs: Array<ClassValue>) {
   return twMerge(clsx(inputs))
 }
 

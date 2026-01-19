@@ -1,5 +1,5 @@
-import { UUID } from 'crypto'
-import { LucideIcon } from 'lucide-react'
+import type { UUID } from 'node:crypto'
+import type { LucideIcon } from 'lucide-react'
 
 export enum CategoryType {
   INCOME = 'income',
