@@ -1,16 +1,17 @@
-import {  clsx } from 'clsx'
-import { twMerge } from 'tailwind-merge'
-import type {ClassValue} from 'clsx';
 import type {
   GroupSplitMetadata,
   GroupTransferMetadata,
-  Transaction} from '@/features/transactions/types';
-import type { User } from '@/features/users/types'
+  Transaction,
+} from '@/features/transactions/types'
 import {
   GroupTransactionType,
   PersonalTransactionType,
   TransactionScope,
 } from '@/features/transactions/types'
+import type { User } from '@/features/users/types'
+import type { ClassValue } from 'clsx'
+import { clsx } from 'clsx'
+import { twMerge } from 'tailwind-merge'
 
 // UI Helpers
 export function cn(...inputs: Array<ClassValue>) {
@@ -51,7 +52,7 @@ export function getUserOwes(
   const userPaid = paidBy[user.id] || 0
   const userSplit = split[user.id] || 0
 
-  return userPaid - userSplit
+  return userSplit - userPaid
 }
 
 export function getUserAmounts(user: User, t: Transaction) {

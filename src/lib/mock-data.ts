@@ -1,21 +1,22 @@
-import { Car, Film, Home, Users, Utensils, Wallet } from 'lucide-react'
-import type { Account} from '@/features/accounts/types';
-import type { Category} from '@/features/categories/types';
+import type { Account } from '@/features/accounts/types'
+import { AccountType, Currency } from '@/features/accounts/types'
+import type { Category } from '@/features/categories/types'
+import { CategoryType } from '@/features/categories/types'
 import type { Chapter } from '@/features/chapters/types'
 import type { Group } from '@/features/groups/types'
 import type {
   GroupTransaction,
   PersonalTransaction,
-  Transaction} from '@/features/transactions/types';
-import type { User } from '@/features/users/types'
-import type { UUID } from 'node:crypto'
+  Transaction,
+} from '@/features/transactions/types'
 import {
   GroupTransactionType,
   PersonalTransactionType,
   TransactionScope,
 } from '@/features/transactions/types'
-import { CategoryType } from '@/features/categories/types'
-import { AccountType, Currency } from '@/features/accounts/types'
+import type { User } from '@/features/users/types'
+import type { UUID } from 'crypto'
+import { Car, Film, Home, Users, Utensils, Wallet } from 'lucide-react'
 
 // Users
 export const mockUsers: Array<User> = [
@@ -209,9 +210,9 @@ export const mockGroupTransactions: Array<GroupTransaction> = [
         u2: 10000, // Ishan
       },
       split: {
-        u0: 5000, // Nishit
-        u1: 5000, // Dev
-        u2: 10000, // Ishan
+        u0: 2500, // Nishit
+        u1: 2500, // Dev
+        u2: 5000, // Ishan
       },
     },
     userMetadata: {

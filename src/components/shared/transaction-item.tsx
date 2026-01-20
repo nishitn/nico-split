@@ -1,113 +1,296 @@
-import { Users } from 'lucide-react'
+import {
+  NsAmount,
+  NsCard,
+  NsContent,
+  NsIcon,
+  NsMainRow,
+  NsSubRow,
+} from '@/components/ui/ns-card'
+import { Account } from '@/features/accounts/types'
+import { Category } from '@/features/categories/types'
+import { Group } from '@/features/groups/types'
 import type {
   GroupSplitMetadata,
-  Transaction} from '@/features/transactions/types';
-import type { User } from '@/features/users/types'
-import {
-  GroupTransactionType,
-  TransactionScope,
+  GroupTransaction,
+  GroupTransferMetadata,
+  PersonalTransaction,
+  Transaction,
 } from '@/features/transactions/types'
 import {
-  cn,
-  getAmountsColor,
-  getOwesColor,
-  getOwesText,
-  getUserAmounts,
-} from '@/lib/utils'
+  GroupTransactionType,
+  PersonalTransactionType,
+  TransactionScope,
+} from '@/features/transactions/types'
+import type { User } from '@/features/users/types'
+import { cn, getOwesColor, getOwesText, getUserOwes } from '@/lib/utils'
+import { FileQuestion, LucideIcon, MoveRight, Users } from 'lucide-react'
+import { ReactNode } from 'react'
+import { CurrencySpan } from '../ui/currency-span'
+import { Separator } from '../ui/separator'
 
 interface TransactionItemProps {
-  transaction: Transaction
+  tx: Transaction
   user: User
 }
 
-export function TransactionItem({ transaction, user }: TransactionItemProps) {
-  const { income, expense, owes } = getUserAmounts(user, transaction)
-
-  // Determine if it's income or expense for the main amount display
-  // If income > 0, it's green. If expense > 0, it's red (display as negative)
-  // If only owes changed (like in a split where I paid exact share), might be neutral
-
-  const netAmount = income - expense
-  const amountColor = getAmountsColor(netAmount, 'text-foreground')
-
-  const formattedAmount = Math.abs(netAmount).toLocaleString('en-IN', {
-    style: 'currency',
-    currency: transaction.currency.toUpperCase(),
-  })
-
-  const owesColor = getOwesColor(owes, 'text-muted-foreground')
-  const formattedOwes = Math.abs(owes).toLocaleString('en-IN', {
-    style: 'currency',
-    currency: transaction.currency.toUpperCase(),
-  })
-
-  // Icon and Category/Group logic
-  let Icon = Users // Default fallback
-  let title = ''
-  let subtitle = ''
-  let subIcon = null
-
-  if (transaction.scope === TransactionScope.PERSONAL) {
-    Icon = transaction.metadata.category?.icon || Users
-    title = transaction.metadata.category?.label || 'Uncategorized'
-    subtitle = transaction.note || transaction.metadata.account.label
-  } else {
-    // Group Transaction
-    Icon = transaction.group.icon || Users
-    title = transaction.group.label
-    subtitle = transaction.note || 'Group Expense'
-
-    // Additional logic for group details
-    if (transaction.type === GroupTransactionType.SPLIT) {
-      const meta = transaction.groupMetadata as GroupSplitMetadata
-      subIcon = meta.category?.icon
+export function TransactionItem({ tx, user }: TransactionItemProps) {
+  if (tx.scope === TransactionScope.PERSONAL) {
+    return <PersonalTransactionItem tx={tx} />
+  } else if (tx.scope === TransactionScope.GROUP) {
+    if (tx.type === GroupTransactionType.SPLIT) {
+      return <GroupSplitTransactionItem tx={tx} user={user} />
+    } else if (tx.type === GroupTransactionType.TRANSFER) {
+      return <GroupTransferTransactionItem tx={tx} user={user} />
     }
+  }
+}
+
+export function PersonalTransactionItem({ tx }: { tx: PersonalTransaction }) {
+  let amountColor: string
+  if (tx.type === PersonalTransactionType.EXPENSE) {
+    amountColor = 'text-expense'
+  } else if (tx.type === PersonalTransactionType.INCOME) {
+    amountColor = 'text-income'
+  } else {
+    amountColor = 'text-card-foreground'
+  }
+
+  const isTransfer = tx.type === PersonalTransactionType.TRANSFER
+
+  let icon: LucideIcon
+  if (isTransfer) {
+    icon = Users
+  } else {
+    icon = tx.metadata.category?.icon || FileQuestion
+  }
+
+  let metadataRow: ReactNode
+  if (isTransfer) {
+    metadataRow = (
+      <TransferRow
+        fromAccount={tx.metadata.account}
+        toAccount={tx.metadata.toAccount!}
+      />
+    )
+  } else {
+    metadataRow = (
+      <MetaDataRow
+        userCategory={tx.metadata.category}
+        account={tx.metadata.account}
+      />
+    )
   }
 
   return (
-    <div className="border-border flex flex-col border-b py-3 last:border-0">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <div className="bg-secondary text-secondary-foreground flex h-10 w-10 items-center justify-center rounded-full">
-            <Icon className="h-5 w-5" />
-          </div>
-          <div className="flex flex-col">
-            <span className="text-sm font-medium">{title}</span>
-            <span className="text-muted-foreground line-clamp-1 text-xs">
-              {subtitle}
+    <NsCard>
+      <NsIcon icon={icon} />
+      <NsContent>
+        <NsMainRow>
+          <div className="flex w-full min-w-0 flex-col gap-1">
+            {tx.note && <NoteRow note={tx.note} />}
+            <span className="text-muted-foreground flex flex-1 flex-wrap items-center gap-x-3 gap-y-1 text-sm">
+              {metadataRow}
             </span>
           </div>
-        </div>
+          <NsAmount className={amountColor} amount={tx.amount} />
+        </NsMainRow>
+      </NsContent>
+    </NsCard>
+  )
+}
 
-        <div className="flex flex-col items-end">
-          <span className={cn('text-sm font-bold', amountColor)}>
-            {netAmount < 0 ? '-' : '+'}
-            {formattedAmount}
-          </span>
-        </div>
-      </div>
+function NoteRow({ note }: { note: string }) {
+  return <div className="text-card-foreground flex-1 truncate">{note}</div>
+}
 
-      {/* Additional Row for splits/owes info */}
-      {(transaction.scope === TransactionScope.GROUP || owes !== 0) && (
-        <div className="text-muted-foreground mt-2 flex items-center gap-1 pl-[3.25rem] text-xs">
-          {transaction.scope === TransactionScope.GROUP && (
-            <span className="bg-secondary/50 flex items-center gap-1 rounded px-1.5 py-0.5 text-[10px]">
-              <Users className="h-3 w-3" />
-              Group
-            </span>
-          )}
-
-          {owes !== 0 && (
-            <span className={cn('ml-auto italic', owesColor)}>
-              {getOwesText(owes)} {formattedOwes}
-            </span>
-          )}
-          {transaction.scope === TransactionScope.GROUP &&
-            transaction.type === GroupTransactionType.TRANSFER && (
-              <span className="ml-auto italic">Transfer</span>
-            )}
-        </div>
+function MetaDataRow({
+  userCategory,
+  account,
+  group,
+  groupCategory,
+}: {
+  userCategory?: Category
+  account?: Account
+  group?: Group
+  groupCategory?: Category
+}) {
+  const categoryLabel = userCategory ? userCategory.label : groupCategory?.label
+  return (
+    <>
+      {categoryLabel && (
+        <>
+          {categoryLabel} <span className="text-xs">•</span>
+        </>
       )}
-    </div>
+      {account && (
+        <span className="flex items-center gap-1">
+          <AccountText className="size-3" account={account} />
+        </span>
+      )}
+      {group && (
+        <span className="flex items-center gap-1 rounded-md bg-muted px-2 text-xs text-muted-foreground">
+          {group.label}
+        </span>
+      )}
+    </>
+  )
+}
+
+function TransferRow({
+  fromAccount,
+  toAccount,
+}: {
+  fromAccount: Account
+  toAccount: Account
+}) {
+  return (
+    <>
+      <span className="flex items-center gap-1">
+        <AccountText account={fromAccount} className="size-3" />
+      </span>
+      <MoveRight />
+      <span className="flex items-center gap-1">
+        <AccountText account={toAccount} className="size-3" />
+      </span>
+    </>
+  )
+}
+
+function AccountText({
+  account,
+  className,
+}: {
+  account: Account
+  className?: string
+}) {
+  const Icon = account.icon
+  return (
+    <>
+      <Icon className={className} /> {account.label}
+    </>
+  )
+}
+
+export function GroupSplitTransactionItem({
+  tx,
+  user,
+}: {
+  tx: GroupTransaction
+  user: User
+}) {
+  const groupMetadata = tx.groupMetadata as GroupSplitMetadata
+
+  const paidByText = getPaidByText(user, groupMetadata.paidBy, tx.group.members)
+  const userPaid = groupMetadata.paidBy[user.id] || 0
+  const amountColor = userPaid === 0 ? 'text-card-foreground' : 'text-expense'
+
+  const userOwes = getUserOwes(user, groupMetadata.paidBy, groupMetadata.split)
+  const userOwesColor = getOwesColor(userOwes, 'text-card-foreground')
+  const userOwesText = getOwesText(userOwes)
+
+  const metadataRow = (
+    <MetaDataRow
+      userCategory={tx.userMetadata.category}
+      group={tx.group}
+      groupCategory={groupMetadata.category}
+    />
+  )
+
+  return (
+    <NsCard>
+      <NsIcon icon={tx.group.icon} />
+      <NsContent>
+        <NsMainRow>
+          <div className="flex w-full min-w-0 flex-col gap-1">
+            {tx.note && <NoteRow note={tx.note} />}
+            <span className="text-muted-foreground flex flex-1 flex-wrap items-center gap-x-3 gap-y-1 text-sm">
+              {metadataRow}
+            </span>
+          </div>
+          <NsAmount className={amountColor} amount={userPaid} />
+        </NsMainRow>
+        <Separator />
+        <NsSubRow>
+          <span className="flex-1">
+            {paidByText} paid <CurrencySpan amount={tx.amount} />
+          </span>
+          <span className={cn('flex item-center gap-1', userOwesColor)}>
+            {userOwesText} <CurrencySpan amount={userOwes} />
+          </span>
+        </NsSubRow>
+      </NsContent>
+    </NsCard>
+  )
+}
+
+function getPaidByText(
+  user: User,
+  paidBy: Record<string, number>,
+  members: Array<User>,
+) {
+  let paidByText: string
+  const paidByLen = Object.keys(paidBy).length
+
+  if (paidByLen === 0) {
+    throw new Error('No paidBy found')
+  } else if (paidByLen === 1) {
+    if (paidBy[user.id]) {
+      paidByText = 'You'
+    } else {
+      const payeeId = Object.keys(paidBy)[0]
+      paidByText = members.find((m) => m.id === payeeId)?.name || 'Unknown'
+    }
+  } else {
+    if (paidBy[user.id]) {
+      paidByText = `You + ${paidByLen - 1} others`
+    } else {
+      paidByText = 'Multiple People'
+    }
+  }
+
+  return paidByText
+}
+
+export function GroupTransferTransactionItem({
+  tx,
+  user,
+}: {
+  tx: GroupTransaction
+  user: User
+}) {
+  const groupMetadata = tx.groupMetadata as GroupTransferMetadata
+
+  const amountColor =
+    groupMetadata.paidBy.id === user.id ? 'text-card-expense' : 'text-income'
+
+  const metadataRow = (
+    <GroupTransferRow from={groupMetadata.paidBy} to={groupMetadata.paidTo} />
+  )
+
+  return (
+    <NsCard>
+      <NsIcon icon={tx.group.icon} />
+      <NsContent>
+        <NsMainRow>
+          <div className="flex w-full min-w-0 flex-col gap-1">
+            {tx.note && <NoteRow note={tx.note} />}
+            <span className="text-muted-foreground flex flex-1 flex-wrap items-center gap-x-3 gap-y-1 text-sm">
+              {metadataRow}
+            </span>
+          </div>
+          <NsAmount className={amountColor} amount={tx.amount} />
+        </NsMainRow>
+      </NsContent>
+    </NsCard>
+  )
+}
+
+function GroupTransferRow({ from, to }: { from: User; to: User }) {
+  return (
+    <>
+      <span className="flex items-center gap-1">{from.name}</span>
+      <MoveRight />
+      <span className="flex items-center gap-1">{to.name}</span>
+    </>
   )
 }

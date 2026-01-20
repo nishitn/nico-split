@@ -22,6 +22,7 @@
   --accent-foreground: #18181b;
   --destructive: #ef4444;
   --border: #e4e4e7;
+  --border-hover: var(--primary);
   --input: #e4e4e7;
   --ring: #a1a1aa;
   --chart-1: #a7f3d0;
@@ -47,6 +48,7 @@
   --background: #09090b;
   --foreground: #fafafa;
   --card: #18181b;
+  --card-hover: #244032;
   --card-foreground: #fafafa;
   --popover: #18181b;
   --popover-foreground: #fafafa;
@@ -60,6 +62,7 @@
   --accent-foreground: #fafafa;
   --destructive: #f87171;
   --border: #ffffff1a;
+  --border-hover: #2d5241;
   --input: #ffffff26;
   --ring: #71717a;
   --chart-1: #a7f3d0;
@@ -98,6 +101,7 @@
   --color-ring: var(--ring);
   --color-input: var(--input);
   --color-border: var(--border);
+  --color-border-hover: var(--border-hover);
   --color-destructive: var(--destructive);
   --color-accent-foreground: var(--accent-foreground);
   --color-accent: var(--accent);
@@ -111,6 +115,7 @@
   --color-popover: var(--popover);
   --color-card-foreground: var(--card-foreground);
   --color-card: var(--card);
+  --color-card-hover: var(--card-hover);
   --color-foreground: var(--foreground);
   --color-background: var(--background);
 

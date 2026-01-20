@@ -1,6 +1,6 @@
 import { AppLayout } from '@/components/layout/app-layout'
+import { DayTransactionRow } from '@/components/layout/day-transaction-row'
 import { RouteToolbar } from '@/components/layout/route-toolbar'
-import { TransactionItem } from '@/components/shared/transaction-item'
 import { ActionButton } from '@/components/ui/action-button'
 import { CurrencySpan } from '@/components/ui/currency-span'
 import { MonthNavigator } from '@/components/ui/month-navigator'
@@ -8,7 +8,7 @@ import { Separator } from '@/components/ui/separator'
 import { SummaryCell } from '@/components/ui/summary-cell'
 import { useMonthlyStats, useTransactions } from '@/features/transactions/api'
 import { useCurrentUser } from '@/features/users/api'
-import { groupTransactionsByDate } from '@/lib/transactions-util'
+import { dateString, groupTransactionsByDate } from '@/lib/transactions-util'
 import { cn, getAmountsColor, getOwesColor, getOwesText } from '@/lib/utils'
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { ReactNode, useMemo } from 'react'
@@ -89,6 +89,29 @@ function TransactionsPage() {
     )
   }
 
+  let transactionsList: ReactNode
+  if (isTransactionsLoading) {
+    transactionsList = (
+      <div className="text-muted-foreground border-border bg-card rounded-lg border border-dashed p-8 text-center">
+        Loading transactions...
+      </div>
+    )
+  } else if (dayWiseTransactions.length === 0) {
+    transactionsList = (
+      <div className="text-muted-foreground border-border bg-card rounded-lg border border-dashed p-8 text-center">
+        No transactions found for this month.
+      </div>
+    )
+  } else {
+    transactionsList = dayWiseTransactions.map((dayData) => (
+      <DayTransactionRow
+        key={dateString(dayData.date)}
+        dayData={dayData}
+        user={user}
+      />
+    ))
+  }
+
   const isLoading = isTransactionsLoading || isStatsLoading
 
   return (
@@ -108,69 +131,10 @@ function TransactionsPage() {
         {summaryStats}
       </RouteToolbar>
 
-      <div className="flex flex-col gap-6 pb-20 md:pb-0">
+      <div className="flex flex-col gap-4 pb-20 md:pb-0">
         <h1 className="text-lg font-semibold">Transactions</h1>
 
-        {/* Transactions List */}
-        <div className="flex flex-col gap-4">
-          {isLoading ? (
-            <div className="space-y-4">
-              {[1, 2, 3].map((i) => (
-                <div
-                  key={i}
-                  className="bg-muted h-16 animate-pulse rounded-lg"
-                />
-              ))}
-            </div>
-          ) : dayWiseTransactions.length === 0 ? (
-            <div className="text-muted-foreground py-10 text-center">
-              No transactions found for this month.
-            </div>
-          ) : (
-            <div className="flex flex-col gap-6">
-              {dayWiseTransactions.map((group) => (
-                <div
-                  key={group.date.toISOString()}
-                  className="flex flex-col gap-2"
-                >
-                  {/* Date Header */}
-                  <div className="bg-background/95 border-border/50 sticky top-[4rem] z-10 flex items-center justify-between border-b py-2 backdrop-blur">
-                    <span className="text-muted-foreground text-sm font-semibold tracking-wider uppercase">
-                      {group.date.toLocaleDateString('en-IN', {
-                        day: '2-digit',
-                        month: 'short',
-                        weekday: 'short',
-                      })}
-                    </span>
-                    <div className="flex items-center gap-3 text-xs font-medium">
-                      {group.income > 0 && (
-                        <span className="text-income">
-                          +{group.income.toLocaleString()}
-                        </span>
-                      )}
-                      {group.expense > 0 && (
-                        <span className="text-expense">
-                          -{group.expense.toLocaleString()}
-                        </span>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Transactions */}
-                  <div className="border-border bg-card overflow-hidden rounded-xl border px-4">
-                    {group.transactions.map((tx) => (
-                      <TransactionItem
-                        key={tx.id}
-                        transaction={tx}
-                        user={user}
-                      />
-                    ))}
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
+        {transactionsList}
       </div>
     </AppLayout>
   )

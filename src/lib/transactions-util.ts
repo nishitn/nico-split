@@ -37,6 +37,6 @@ export function groupTransactionsByDate(
   )
 }
 
-function dateString(date: Date) {
+export function dateString(date: Date) {
   return date.toISOString().split('T')[0]
 }
