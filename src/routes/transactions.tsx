@@ -112,8 +112,6 @@ function TransactionsPage() {
     ))
   }
 
-  const isLoading = isTransactionsLoading || isStatsLoading
-
   return (
     <AppLayout
       routeTitle="Dashboard"
@@ -175,7 +173,7 @@ function TransactionSummaryStats({
       </div>
       <Separator orientation="vertical" className="hidden xl:block" />
       <Separator className="xl:hidden" />
-      <SummaryCell heading="Balance">
+      <SummaryCell heading="Balance (Month)">
         <span className={cn('font-bold', balanceColor)}>
           {balance >= 0 ? '+' : '-'}
           <CurrencySpan amount={balance} />

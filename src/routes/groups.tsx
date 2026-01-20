@@ -1,11 +1,15 @@
 import { AppLayout } from '@/components/layout/app-layout'
+import { GroupRow } from '@/components/layout/group-row'
 import { RouteToolbar } from '@/components/layout/route-toolbar'
-import { MoneyCard } from '@/components/shared/money-card'
+import { CurrencySpan } from '@/components/ui/currency-span'
 import { MonthNavigator } from '@/components/ui/month-navigator'
+import { Separator } from '@/components/ui/separator'
+import { SummaryCell } from '@/components/ui/summary-cell'
 import { useGroupBalances } from '@/features/groups/api'
 import { useCurrentUser } from '@/features/users/api'
-import { cn } from '@/lib/utils'
+import { cn, getOwesColor, getOwesText } from '@/lib/utils'
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
+import { ReactNode } from 'react'
 import { z } from 'zod'
 
 const groupsSearchSchema = z.object({
@@ -22,16 +26,15 @@ function GroupsPage() {
   const navigate = useNavigate({ from: Route.fullPath })
   const search = Route.useSearch()
 
-  const now = new Date()
-  const month = search.month ? search.month - 1 : now.getMonth()
-  const year = search.year ?? now.getFullYear()
+  // #region Get Date from search params or use current date
+  const currentDate = new Date()
+  const month = search.month ? search.month - 1 : currentDate.getMonth()
+  const year = search.year ?? currentDate.getFullYear()
 
-  const { data: user } = useCurrentUser()
-  const { data: groupBalances, isLoading } = useGroupBalances(user, month, year)
-
-  const handleDateChange = (newMonth: number, newYear: number) => {
+  const setMonthYear = (newMonth: number, newYear: number) => {
     const isCurrent =
-      newMonth === now.getMonth() && newYear === now.getFullYear()
+      newMonth === currentDate.getMonth() &&
+      newYear === currentDate.getFullYear()
     navigate({
       search: {
         month: isCurrent ? undefined : newMonth + 1,
@@ -40,24 +43,66 @@ function GroupsPage() {
     })
   }
 
+  // #endregion
+
+  // #region Load Data
+  const { data: user } = useCurrentUser()
+  const { data: groupBalances = [], isLoading: isLoadingBalances } =
+    useGroupBalances(user, month, year)
+
+  // #endregion
+
   if (!user) return <div className="flex justify-center p-8">Loading...</div>
 
-  // Calculate totals
-  // Calculate totals
-  const totalMonthlyOwes =
-    groupBalances?.reduce((acc, gb) => {
-      // Sum up monthly owes where I owe someone
-      const myMonthlyDebt = Object.entries(gb.monthlyOwes).reduce(
-        (sum, [_uid, amount]) => {
-          // If amount > 0, I owe them. If < 0, they owe me.
-          return sum + amount
-        },
-        0,
-      )
-      return acc + myMonthlyDebt
-    }, 0) || 0
-  const totalOverallOwed =
-    groupBalances?.reduce((acc, gb) => acc + gb.balance, 0) || 0
+  // #region Calculate totals
+  const totalMonthlyOwes = groupBalances.reduce((acc, gb) => {
+    // Sum up what the user owes in this group for this month
+    const groupMonthlyNet = Object.values(gb.monthlyOwes).reduce(
+      (sum, amount) => sum + amount,
+      0,
+    )
+    return acc + groupMonthlyNet
+  }, 0)
+
+  const totalOverallOwes = groupBalances.reduce((acc, gb) => {
+    return acc + gb.balance
+  }, 0)
+  // #endregion
+
+  let summaryStats: ReactNode
+  if (isLoadingBalances) {
+    summaryStats = <div className="text-muted-foreground p-4">Loading...</div>
+  } else {
+    summaryStats = (
+      <GroupSummaryStats
+        monthlyOwes={totalMonthlyOwes}
+        overallOwes={totalOverallOwes}
+      />
+    )
+  }
+
+  let groupList: ReactNode
+  if (isLoadingBalances) {
+    groupList = (
+      <div className="text-muted-foreground border-border bg-card rounded-lg border border-dashed p-8 text-center">
+        Loading groups...
+      </div>
+    )
+  } else if (groupBalances.length === 0) {
+    groupList = (
+      <div className="text-muted-foreground border-border bg-card rounded-lg border border-dashed p-8 text-center">
+        No groups found.
+      </div>
+    )
+  } else {
+    groupList = (
+      <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
+        {groupBalances.map((gb) => (
+          <GroupRow key={gb.group.id} groupBalance={gb} />
+        ))}
+      </div>
+    )
+  }
 
   return (
     <AppLayout
@@ -68,103 +113,47 @@ function GroupsPage() {
         <MonthNavigator
           currentMonth={month}
           currentYear={year}
-          onMonthChange={handleDateChange}
+          setMonthYear={setMonthYear}
         />
+        {summaryStats}
       </RouteToolbar>
-      <div className="flex flex-col gap-6 pb-20 md:pb-0">
-        <h1 className="text-2xl font-bold tracking-tight md:hidden">Groups</h1>
-
-        {/* Stats */}
-        <div className="grid gap-4 md:grid-cols-2">
-          <MoneyCard
-            title="Net Owed (Month)"
-            amount={totalMonthlyOwes}
-            type={totalMonthlyOwes > 0 ? 'expense' : 'income'}
-            formatter={(val) =>
-              Math.abs(val).toLocaleString('en-IN', {
-                style: 'currency',
-                currency: 'INR',
-              }) + (totalMonthlyOwes > 0 ? ' (Dr)' : ' (Cr)')
-            }
-          />
-          <MoneyCard
-            title="Net Owed (Overall)"
-            amount={totalOverallOwed}
-            type={totalOverallOwed > 0 ? 'expense' : 'income'}
-            formatter={(val) =>
-              Math.abs(val).toLocaleString('en-IN', {
-                style: 'currency',
-                currency: 'INR',
-              }) + (totalOverallOwed > 0 ? ' (Dr)' : ' (Cr)')
-            }
-          />
-        </div>
-
-        {/* Groups List */}
-        <div className="grid gap-4 md:grid-cols-2">
-          {isLoading ? (
-            <div>Loading groups...</div>
-          ) : (
-            groupBalances?.map((gb) => (
-              <div
-                key={gb.group.id}
-                className="border-border bg-card flex flex-col gap-4 rounded-xl border p-4 shadow-sm"
-              >
-                <div className="flex items-center gap-3">
-                  <div className="bg-primary/10 text-primary flex h-12 w-12 items-center justify-center rounded-full">
-                    <gb.group.icon className="h-6 w-6" />
-                  </div>
-                  <div>
-                    <h3 className="text-lg font-semibold">{gb.group.label}</h3>
-                    <p className="text-muted-foreground text-xs">
-                      {gb.group.members.length} members
-                    </p>
-                  </div>
-                </div>
-
-                <div className="mt-2 grid grid-cols-2 gap-2">
-                  <div className="bg-secondary/50 rounded-lg p-2">
-                    <span className="text-muted-foreground block text-xs">
-                      This Month
-                    </span>
-                    <span
-                      className={cn(
-                        'font-medium',
-                        gb.balance > 0 ? 'text-expense' : 'text-income',
-                      )}
-                    >
-                      {gb.balance > 0 ? 'You owe ' : 'Owes you '}
-                      {Math.abs(gb.balance).toLocaleString('en-IN', {
-                        style: 'currency',
-                        currency: 'INR',
-                        maximumFractionDigits: 0,
-                      })}
-                    </span>
-                  </div>
-                  <div className="bg-secondary/50 rounded-lg p-2">
-                    <span className="text-muted-foreground block text-xs">
-                      Overall
-                    </span>
-                    <span
-                      className={cn(
-                        'font-medium',
-                        gb.balance > 0 ? 'text-expense' : 'text-income',
-                      )}
-                    >
-                      {gb.balance > 0 ? 'You owe ' : 'Owes you '}
-                      {Math.abs(gb.balance).toLocaleString('en-IN', {
-                        style: 'currency',
-                        currency: 'INR',
-                        maximumFractionDigits: 0,
-                      })}
-                    </span>
-                  </div>
-                </div>
-              </div>
-            ))
-          )}
-        </div>
+      <div className="flex flex-col gap-4 pb-20 md:pb-0">
+        <h1 className="text-lg font-semibold">Your Groups</h1>
+        {groupList}
       </div>
     </AppLayout>
+  )
+}
+
+interface GroupSummaryStatsProps {
+  monthlyOwes: number
+  overallOwes: number
+}
+
+function GroupSummaryStats({
+  monthlyOwes,
+  overallOwes,
+}: GroupSummaryStatsProps) {
+  const foregroundColor = 'text-card-foreground'
+  const monthlyOwesColor = getOwesColor(monthlyOwes, foregroundColor)
+  const monthlyOwesText = getOwesText(monthlyOwes)
+
+  const overallOwesText = getOwesText(overallOwes)
+  const overallOwesColor = getOwesColor(overallOwes, foregroundColor)
+
+  return (
+    <div className="flex flex-col justify-center gap-4 w-full xl:w-auto xl:flex-row xl:justify-end xl:gap-8">
+      <SummaryCell heading="This Month">
+        <span className={cn('font-bold', monthlyOwesColor)}>
+          {monthlyOwesText} <CurrencySpan amount={monthlyOwes} />
+        </span>
+      </SummaryCell>
+      <Separator orientation="vertical" />
+      <SummaryCell heading="Overall">
+        <span className={cn('font-bold', overallOwesColor)}>
+          {overallOwesText} <CurrencySpan amount={overallOwes} />
+        </span>
+      </SummaryCell>
+    </div>
   )
 }

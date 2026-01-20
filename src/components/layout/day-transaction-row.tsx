@@ -1,4 +1,4 @@
-import { TransactionItem } from '@/components/shared/transaction-item'
+import { TransactionItem } from '@/components/layout/transaction-item'
 import { CurrencySpan } from '@/components/ui/currency-span'
 import { Separator } from '@/components/ui/separator'
 import { DayTransactionData } from '@/features/transactions/types'
@@ -30,7 +30,7 @@ function DateRow({ dayData }: { dayData: DayTransactionData }) {
         </div>
         <div className="flex flex-row items-center gap-4 text-sm font-semibold">
           <span className="text-expense min-w-25 px-2 text-end">
-            +<CurrencySpan amount={dayData.expense} />
+            -<CurrencySpan amount={dayData.expense} />
           </span>
           <span className="text-income min-w-25 px-2 text-end">
             +<CurrencySpan amount={dayData.income} />

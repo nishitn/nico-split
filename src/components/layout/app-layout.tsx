@@ -50,19 +50,21 @@ export function AppLayout({
       <main className="flex min-w-0 flex-1 flex-col md:overflow-hidden">
         <MobileHeader />
 
-        <div className="flex flex-col justify-start flex-1 p-4 gap-6 md:min-h-0 md:overflow-auto md:p-6">
-          <div className="flex justify-between items-center">
-            <div>
-              <h1 className="text-foreground text-2xl font-bold">
-                {routeTitle}
-              </h1>
-              <span className="text-muted-foreground text-sm">
-                {routeSubtitle}
-              </span>
+        <div className="flex flex-col flex-1 p-4 md:min-h-0 md:overflow-auto md:p-6">
+          <div className="mx-auto w-full max-w-6xl flex flex-col gap-6">
+            <div className="flex justify-between items-center">
+              <div>
+                <h1 className="text-foreground text-2xl font-bold">
+                  {routeTitle}
+                </h1>
+                <span className="text-muted-foreground text-sm">
+                  {routeSubtitle}
+                </span>
+              </div>
+              {actionButton}
             </div>
-            {actionButton}
+            {children}
           </div>
-          {children}
         </div>
       </main>
 

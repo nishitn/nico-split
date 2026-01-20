@@ -128,17 +128,17 @@ export const api = {
       // Extract how much the given user owes to each member
       monthlySettlements.forEach((s) => {
         if (s.from === user.id) {
-          monthlyOwes[s.to] += s.amount
+          monthlyOwes[s.to] = (monthlyOwes[s.to] || 0) + s.amount
         } else if (s.to === user.id) {
-          monthlyOwes[s.from] -= s.amount
+          monthlyOwes[s.from] = (monthlyOwes[s.from] || 0) - s.amount
         }
       })
 
       overallSettlements.forEach((s) => {
         if (s.from === user.id) {
-          overallOwes[s.to] += s.amount
+          overallOwes[s.to] = (overallOwes[s.to] || 0) + s.amount
         } else if (s.to === user.id) {
-          overallOwes[s.from] -= s.amount
+          overallOwes[s.from] = (overallOwes[s.from] || 0) - s.amount
         }
       })
 
@@ -146,7 +146,7 @@ export const api = {
         group,
         monthlyOwes,
         overallOwes,
-        balance: overallOwes[user.id] || 0,
+        balance: overallNet[user.id] || 0,
       })
     }
 

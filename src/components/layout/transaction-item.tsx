@@ -148,7 +148,7 @@ function TransferRow({
       <span className="flex items-center gap-1">
         <AccountText account={fromAccount} className="size-3" />
       </span>
-      <MoveRight />
+      <MoveRight className="size-4" />
       <span className="flex items-center gap-1">
         <AccountText account={toAccount} className="size-3" />
       </span>
@@ -289,7 +289,7 @@ function GroupTransferRow({ from, to }: { from: User; to: User }) {
   return (
     <>
       <span className="flex items-center gap-1">{from.name}</span>
-      <MoveRight />
+      <MoveRight className="size-4" />
       <span className="flex items-center gap-1">{to.name}</span>
     </>
   )

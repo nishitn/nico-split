@@ -77,9 +77,11 @@ export function getUserAmounts(user: User, t: Transaction) {
       const groupMetadata = t.groupMetadata as GroupTransferMetadata
       if (groupMetadata.paidBy.id === user.id) {
         expense += t.amount
+        owes -= t.amount
       }
       if (groupMetadata.paidTo.id === user.id) {
         income += t.amount
+        owes += t.amount
       }
     }
   }
