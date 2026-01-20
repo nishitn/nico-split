@@ -1,7 +1,7 @@
-import { Link, createFileRoute } from '@tanstack/react-router'
-import { ChevronRight } from 'lucide-react'
 import { AppLayout } from '@/components/layout/app-layout'
 import { navItems } from '@/config/nav'
+import { Link, createFileRoute } from '@tanstack/react-router'
+import { ChevronRight } from 'lucide-react'
 
 export const Route = createFileRoute('/more')({
   component: MorePage,
@@ -12,7 +12,7 @@ function MorePage() {
 
   return (
     <AppLayout>
-      <div className="flex flex-col gap-4">
+      <div className="flex flex-col gap-4 pb-20 md:pb-0">
         <h1 className="text-2xl font-bold tracking-tight md:hidden">More</h1>
         <div className="grid gap-2">
           {moreItems.map((item) => (

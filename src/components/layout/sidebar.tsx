@@ -1,3 +1,5 @@
+import type { NavItem } from '@/components/layout/app-layout'
+import { MainLogo } from '@/components/layout/header'
 import { ModeToggle } from '@/components/mode-toggle'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
@@ -9,53 +11,16 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
+import { NavLink } from '@/components/ui/nav-link'
 import { Separator } from '@/components/ui/separator'
 import { useCurrentUser } from '@/features/users/api'
 import { User } from '@/features/users/types'
-import { cn } from '@/lib/utils'
-import { Link, useLocation } from '@tanstack/react-router'
-import { CircleUser, LogOut, Settings, Wallet } from 'lucide-react'
+import { Link } from '@tanstack/react-router'
+import { CircleUser, LogOut, Settings } from 'lucide-react'
 import { Suspense } from 'react'
-import type { NavItem } from './app-layout'
 
 export interface SidebarProps {
   navItems: Array<NavItem>
-}
-
-function MainLogo() {
-  return (
-    <div className="flex flex-col">
-      <div className="flex items-center gap-2 p-2">
-        <Wallet className="text-primary h-8 w-8" />
-        <span className="text-xl font-bold">NicoSplit</span>
-      </div>
-      <Separator />
-    </div>
-  )
-}
-
-function SidebarNavLink({
-  href,
-  isActive,
-  children,
-}: {
-  href: string
-  isActive: boolean
-  children: React.ReactNode
-}) {
-  return (
-    <Link
-      to={href}
-      className={cn(
-        'flex items-center gap-2 rounded-md p-2 text-sm font-md transition-colors',
-        isActive
-          ? 'bg-primary/10 text-primary'
-          : 'text-muted-foreground hover:bg-sidebar-accent hover:text-foreground',
-      )}
-    >
-      {children}
-    </Link>
-  )
 }
 
 function ProfileSection({ currentUser }: { currentUser: User }) {
@@ -102,25 +67,20 @@ function ProfileSection({ currentUser }: { currentUser: User }) {
 
 export function Sidebar({ navItems }: SidebarProps) {
   const { data: currentUser } = useCurrentUser()
-  const location = useLocation()
-
-  // Simple check for active route to style styling
-  const isActive = (path: string) => location.pathname.startsWith(path)
 
   return (
     <aside className="border-sidebar-border bg-sidebar text-sidebar-foreground sticky top-0 hidden h-screen w-64 flex-col gap-4 border-r p-4 md:flex">
-      <MainLogo />
+      <div className="flex flex-col">
+        <MainLogo />
+        <Separator />
+      </div>
 
       <nav className="flex flex-1 flex-col gap-2">
         {navItems.map((item) => (
-          <SidebarNavLink
-            key={item.href}
-            href={item.href}
-            isActive={isActive(item.href)}
-          >
+          <NavLink key={item.href} href={item.href}>
             <item.icon className="h-4 w-4" />
             {item.label}
-          </SidebarNavLink>
+          </NavLink>
         ))}
       </nav>
 
