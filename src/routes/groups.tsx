@@ -1,14 +1,15 @@
-import { createFileRoute, useNavigate } from '@tanstack/react-router'
-import { z } from 'zod'
 import { AppLayout } from '@/components/layout/app-layout'
+import { RouteToolbar } from '@/components/layout/route-toolbar'
 import { MoneyCard } from '@/components/shared/money-card'
-import { MonthYearPicker } from '@/components/shared/month-year-picker'
+import { MonthNavigator } from '@/components/ui/month-navigator'
 import { useGroupBalances } from '@/features/groups/api'
 import { useCurrentUser } from '@/features/users/api'
 import { cn } from '@/lib/utils'
+import { createFileRoute, useNavigate } from '@tanstack/react-router'
+import { z } from 'zod'
 
 const groupsSearchSchema = z.object({
-  month: z.number().optional(),
+  month: z.number().min(1).max(12).optional(),
   year: z.number().optional(),
 })
 
@@ -21,25 +22,27 @@ function GroupsPage() {
   const navigate = useNavigate({ from: Route.fullPath })
   const search = Route.useSearch()
 
-  const currentDate = new Date()
-  const month = search.month ?? currentDate.getMonth()
-  const year = search.year ?? currentDate.getFullYear()
+  const now = new Date()
+  const month = search.month ? search.month - 1 : now.getMonth()
+  const year = search.year ?? now.getFullYear()
 
   const { data: user } = useCurrentUser()
-  const { data: groupBalances, isLoading } = useGroupBalances(
-    user,
-    month,
-    year,
-  )
+  const { data: groupBalances, isLoading } = useGroupBalances(user, month, year)
 
   const handleDateChange = (newMonth: number, newYear: number) => {
+    const isCurrent =
+      newMonth === now.getMonth() && newYear === now.getFullYear()
     navigate({
-      search: { month: newMonth, year: newYear },
+      search: {
+        month: isCurrent ? undefined : newMonth + 1,
+        year: isCurrent ? undefined : newYear,
+      },
     })
   }
 
   if (!user) return <div className="flex justify-center p-8">Loading...</div>
 
+  // Calculate totals
   // Calculate totals
   const totalMonthlyOwes =
     groupBalances?.reduce((acc, gb) => {
@@ -47,30 +50,27 @@ function GroupsPage() {
       const myMonthlyDebt = Object.entries(gb.monthlyOwes).reduce(
         (sum, [_uid, amount]) => {
           // If amount > 0, I owe them. If < 0, they owe me.
-          // Requirement: "show amount owed this month". Often implies debt.
-          // Let's show Net position? Or just debt?
-          // "show amount owed this month and overall, instead of income, expense balance"
-          // Let's assume Net Owed (Positive = Debt, Negative = Credit)
           return sum + amount
         },
         0,
       )
       return acc + myMonthlyDebt
     }, 0) || 0
-
   const totalOverallOwed =
     groupBalances?.reduce((acc, gb) => acc + gb.balance, 0) || 0
 
   return (
     <AppLayout
-      headerAction={
-        <MonthYearPicker
-          month={month}
-          year={year}
-          onChange={handleDateChange}
-        />
-      }
+      routeTitle="Groups"
+      routeSubtitle="Balances across your shared groups"
     >
+      <RouteToolbar>
+        <MonthNavigator
+          currentMonth={month}
+          currentYear={year}
+          onMonthChange={handleDateChange}
+        />
+      </RouteToolbar>
       <div className="flex flex-col gap-6 pb-20 md:pb-0">
         <h1 className="text-2xl font-bold tracking-tight md:hidden">Groups</h1>
 

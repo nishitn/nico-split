@@ -1,17 +1,22 @@
-import { createFileRoute, useNavigate } from '@tanstack/react-router'
-import { Wallet } from 'lucide-react'
-import { z } from 'zod'
 import { AppLayout } from '@/components/layout/app-layout'
-import { MoneyCard } from '@/components/shared/money-card'
-import { MonthYearPicker } from '@/components/shared/month-year-picker'
+import { RouteToolbar } from '@/components/layout/route-toolbar'
 import { TransactionItem } from '@/components/shared/transaction-item'
+import { ActionButton } from '@/components/ui/action-button'
+import { CurrencySpan } from '@/components/ui/currency-span'
+import { MonthNavigator } from '@/components/ui/month-navigator'
+import { Separator } from '@/components/ui/separator'
+import { SummaryCell } from '@/components/ui/summary-cell'
 import { useMonthlyStats, useTransactions } from '@/features/transactions/api'
 import { useCurrentUser } from '@/features/users/api'
 import { groupTransactionsByDate } from '@/lib/transactions-util'
+import { cn, getAmountsColor, getOwesColor, getOwesText } from '@/lib/utils'
+import { createFileRoute, useNavigate } from '@tanstack/react-router'
+import { ReactNode, useMemo } from 'react'
+import { z } from 'zod'
 
 // Schema for search params
 const transactionsSearchSchema = z.object({
-  month: z.number().optional(),
+  month: z.number().min(1).max(12).optional(),
   year: z.number().optional(),
 })
 
@@ -24,108 +29,90 @@ function TransactionsPage() {
   const navigate = useNavigate({ from: Route.fullPath })
   const search = Route.useSearch()
 
-  // Default to current month/year if not present
+  // #region Get Date from search params or use current date
   const currentDate = new Date()
-  const month = search.month ?? currentDate.getMonth()
+  const month = search.month ? search.month - 1 : currentDate.getMonth()
   const year = search.year ?? currentDate.getFullYear()
 
+  const setMonthYear = (newMonth: number, newYear: number) => {
+    const isCurrent =
+      newMonth === currentDate.getMonth() &&
+      newYear === currentDate.getFullYear()
+    navigate({
+      search: {
+        month: isCurrent ? undefined : newMonth + 1,
+        year: isCurrent ? undefined : newYear,
+      },
+    })
+  }
+
+  // #endregion
+
+  // #region Load Data
   const { data: user } = useCurrentUser()
-  const { data: transactions, isLoading: isTransactionsLoading } =
+  const { data: transactions = [], isLoading: isTransactionsLoading } =
     useTransactions(month, year)
 
-  // Conditionally fetch stats only when user is available
+  if (!user)
+    return <div className="flex justify-center p-8">Loading user...</div>
+
   const { data: stats, isLoading: isStatsLoading } = useMonthlyStats(
     user,
     month,
     year,
   )
 
-  const handleDateChange = (newMonth: number, newYear: number) => {
-    navigate({
-      search: { month: newMonth, year: newYear },
-    })
+  const dayWiseTransactions = useMemo(
+    () => groupTransactionsByDate(transactions, user),
+    [transactions, user],
+  )
+
+  // #endregion
+
+  let summaryStats: ReactNode
+  if (isStatsLoading) {
+    summaryStats = (
+      <div className="flex justify-center p-8">Loading stats...</div>
+    )
+  } else {
+    const totalIncome = stats?.income || 0
+    const totalExpense = stats?.expense || 0
+    const totalOwes = stats?.owes || 0
+
+    summaryStats = (
+      <TransactionSummaryStats
+        income={totalIncome}
+        expense={totalExpense}
+        owes={totalOwes}
+        balance={totalIncome - totalExpense}
+      />
+    )
   }
 
-  if (!user)
-    return <div className="flex justify-center p-8">Loading user...</div>
-
-  const groupedTransactions = transactions
-    ? groupTransactionsByDate(transactions, user)
-    : []
   const isLoading = isTransactionsLoading || isStatsLoading
 
   return (
     <AppLayout
-      headerAction={
-        <MonthYearPicker
-          month={month}
-          year={year}
-          onChange={handleDateChange}
-        />
+      routeTitle="Dashboard"
+      routeSubtitle="Overview of your monthly transactions"
+      actionButton={
+        <ActionButton to="/transactions/new" text="New Transaction" />
       }
     >
+      <RouteToolbar>
+        <MonthNavigator
+          currentMonth={month}
+          currentYear={year}
+          setMonthYear={setMonthYear}
+        />
+        {summaryStats}
+      </RouteToolbar>
+
       <div className="flex flex-col gap-6 pb-20 md:pb-0">
-        <h1 className="text-2xl font-bold tracking-tight md:hidden">
-          Transactions
-        </h1>
-
-        {/* Stats Grid */}
-        <div className="grid gap-4 md:grid-cols-3">
-          <MoneyCard title="Income" amount={stats?.income || 0} type="income" />
-          <MoneyCard
-            title="Expense"
-            amount={stats?.expense || 0}
-            type="expense"
-          />
-          <MoneyCard
-            title="Owed"
-            amount={stats?.owes || 0}
-            type={stats?.owes && stats.owes < 0 ? 'expense' : 'income'} // Red if I owe, Green if owed to me (roughly)
-            // Actually 'owes' in MonthlyStats: positive if I am owed, negative if I owe?
-            // Let's check api.ts:
-            // getUserAmounts -> owes is (userSplit - userPaid).
-            // If I paid 1000 and split was 500. I am owed 500. (userPaid - userSplit) = 500 -> Wait logic in utils might be reversed or specific.
-            // Utils: owes += userSplit - userPaid.
-            // If I paid 1000 (userPaid), split 500 (userSplit). Owes = 500 - 1000 = -500.
-            // So negative means I am OWED money? That seems counter-intuitive for "Owes".
-            // Usually "Owes" means "I owe".
-            // Let's re-read utils.ts.
-            // getUserAmounts return { owes }.
-            // If split (what I should pay) > paid (what I paid), result is positive. So I OWE money.
-            // If split < paid, result is negative. So I am OWED money.
-            // So Positive = Expense/Debt. Negative = Income/Credit.
-            // So if stats.owes > 0 (I owe), should be red/expense color?
-            // If stats.owes < 0 (I am owed), should be green/income color?
-            // Let's stick to 'default' color or custom logic.
-          />
-        </div>
-
-        {/* Specific Monthly Balance Card (Optional - user requested "monthly expense, income and balance along with monthly money owed")
-            Balance = Income - Expense. 
-            Money Card above covers Income, Expense. 
-            Combined Balance could be useful.
-        */}
-        <div className="grid gap-4 md:grid-cols-1">
-          <div className="bg-primary/10 border-primary/20 flex items-center justify-between rounded-xl border p-4">
-            <div className="flex flex-col">
-              <span className="text-muted-foreground text-sm font-medium">
-                Monthly Balance
-              </span>
-              <span className="text-primary text-2xl font-bold">
-                {((stats?.income || 0) - (stats?.expense || 0)).toLocaleString(
-                  'en-IN',
-                  { style: 'currency', currency: 'INR' },
-                )}
-              </span>
-            </div>
-            <Wallet className="text-primary h-8 w-8 opacity-50" />
-          </div>
-        </div>
+        <h1 className="text-lg font-semibold">Transactions</h1>
 
         {/* Transactions List */}
         <div className="flex flex-col gap-4">
-          <h2 className="text-lg font-semibold">History</h2>
-
           {isLoading ? (
             <div className="space-y-4">
               {[1, 2, 3].map((i) => (
@@ -135,13 +122,13 @@ function TransactionsPage() {
                 />
               ))}
             </div>
-          ) : groupedTransactions.length === 0 ? (
+          ) : dayWiseTransactions.length === 0 ? (
             <div className="text-muted-foreground py-10 text-center">
               No transactions found for this month.
             </div>
           ) : (
             <div className="flex flex-col gap-6">
-              {groupedTransactions.map((group) => (
+              {dayWiseTransactions.map((group) => (
                 <div
                   key={group.date.toISOString()}
                   className="flex flex-col gap-2"
@@ -186,5 +173,56 @@ function TransactionsPage() {
         </div>
       </div>
     </AppLayout>
+  )
+}
+
+interface TransactionSummaryStatsProps {
+  income: number
+  expense: number
+  owes: number
+  balance: number
+}
+
+function TransactionSummaryStats({
+  income,
+  expense,
+  owes,
+  balance,
+}: TransactionSummaryStatsProps) {
+  const foregroundColor = 'text-card-foreground'
+  const balanceColor = getAmountsColor(balance, foregroundColor)
+  const owesColor = getOwesColor(owes, foregroundColor)
+  const owesText = getOwesText(owes)
+
+  return (
+    <div className="flex flex-col justify-center gap-4 w-full xl:w-auto xl:flex-row">
+      <div className="flex flex-row justify-center gap-4 xl:w-auto xl:justify-end">
+        <SummaryCell heading="Expense">
+          <span className="font-bold text-expense">
+            <CurrencySpan amount={expense} />
+          </span>
+        </SummaryCell>
+        <Separator orientation="vertical" />
+        <SummaryCell heading="Income">
+          <span className="font-bold text-income">
+            <CurrencySpan amount={income} />
+          </span>
+        </SummaryCell>
+      </div>
+      <Separator orientation="vertical" className="hidden xl:block" />
+      <Separator className="xl:hidden" />
+      <SummaryCell heading="Balance">
+        <span className={cn('font-bold', balanceColor)}>
+          {balance >= 0 ? '+' : '-'}
+          <CurrencySpan amount={balance} />
+        </span>
+        {owesText && (
+          <span className={cn('text-sm font-bold', owesColor)}>
+            {owesText}
+            <CurrencySpan amount={owes} />
+          </span>
+        )}
+      </SummaryCell>
+    </div>
   )
 }

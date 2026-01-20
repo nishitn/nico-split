@@ -16,7 +16,9 @@ import { MobileHeader } from './header'
 
 interface AppLayoutProps {
   children: React.ReactNode
-  headerAction?: React.ReactNode
+  routeTitle?: string
+  routeSubtitle?: string
+  actionButton?: React.ReactNode
 }
 
 export interface NavItem {
@@ -25,7 +27,12 @@ export interface NavItem {
   icon: LucideIcon
 }
 
-export function AppLayout({ children }: AppLayoutProps) {
+export function AppLayout({
+  children,
+  routeTitle,
+  routeSubtitle,
+  actionButton,
+}: AppLayoutProps) {
   const navItems: Array<NavItem> = [
     { label: 'Transactions', href: '/transactions', icon: LayoutDashboard },
     { label: 'Groups', href: '/groups', icon: Users },
@@ -43,7 +50,18 @@ export function AppLayout({ children }: AppLayoutProps) {
       <main className="flex min-w-0 flex-1 flex-col md:overflow-hidden">
         <MobileHeader />
 
-        <div className="flex-1 p-4 md:min-h-0 md:overflow-auto md:p-6">
+        <div className="flex flex-col justify-start flex-1 p-4 gap-6 md:min-h-0 md:overflow-auto md:p-6">
+          <div className="flex justify-between items-center">
+            <div>
+              <h1 className="text-foreground text-2xl font-bold">
+                {routeTitle}
+              </h1>
+              <span className="text-muted-foreground text-sm">
+                {routeSubtitle}
+              </span>
+            </div>
+            {actionButton}
+          </div>
           {children}
         </div>
       </main>
