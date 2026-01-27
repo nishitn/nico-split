@@ -1,5 +1,5 @@
 import type { Account } from '@/features/accounts/types'
-import type { Category, CategoryStats } from '@/features/categories/types'
+import type { Category, CategoryStat } from '@/features/categories/types'
 import type { Chapter } from '@/features/chapters/types'
 import type { Group, GroupBalance } from '@/features/groups/types'
 import type {
@@ -184,7 +184,7 @@ export const api = {
     user: User,
     month: number,
     year: number,
-  ): Promise<Array<CategoryStats>> => {
+  ): Promise<Array<CategoryStat>> => {
     await delay()
 
     const monthTxs = mockTransactions.filter((tx) => {
@@ -215,23 +215,32 @@ export const api = {
 
     const categories = [...mockCategories]
 
-    const categoryStats: Array<CategoryStats> = categories.map((cat) => {
-      const subCatSum = cat.subCategories
-        .map((subCatId) => {
-          const subCat = mockCategories.find((cat) => cat.id === subCatId)
-          return getAmountForCategory(subCat!)
-        })
-        .reduce((acc, amount) => {
-          acc += amount
-          return acc
-        }, 0)
+    const allSubCategoryIds = new Set(
+      categories.flatMap((c) => c.subCategories),
+    )
+
+    const categoryStats: Array<CategoryStat> = categories.map((cat) => {
+      const getStat = (c: Category): CategoryStat => ({
+        category: c,
+        amount: getAmountForCategory(c),
+        isSubcategory: allSubCategoryIds.has(c.id),
+        subcategories: [],
+      })
+
+      const subStats = cat.subCategories.map((subId) => {
+        const subCat = categories.find((c) => c.id === subId)
+        return getStat(subCat!)
+      })
+
+      const subCatSum = subStats.reduce((acc, s) => acc + s.amount, 0)
 
       return {
-        category: cat,
+        ...getStat(cat),
         amount: getAmountForCategory(cat) + subCatSum,
+        subcategories: subStats,
       }
     })
 
-    return categoryStats
+    return categoryStats.filter((c) => c.amount !== 0)
   },
 }

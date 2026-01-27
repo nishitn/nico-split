@@ -1,5 +1,5 @@
-import type { UUID } from 'node:crypto'
 import type { LucideIcon } from 'lucide-react'
+import type { UUID } from 'node:crypto'
 
 export enum CategoryType {
   INCOME = 'income',
@@ -14,7 +14,9 @@ export interface Category {
   subCategories: Array<UUID>
 }
 
-export interface CategoryStats {
+export interface CategoryStat {
   category: Category
   amount: number
+  isSubcategory: boolean
+  subcategories: Array<CategoryStat>
 }

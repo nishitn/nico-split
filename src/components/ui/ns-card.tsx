@@ -1,8 +1,7 @@
+import { CurrencySpan } from '@/components/ui/currency-span'
 import { cn } from '@/lib/utils'
 import { LucideIcon, User } from 'lucide-react'
 import { ReactNode } from 'react'
-import { CurrencySpan } from './currency-span'
-import { Separator } from './separator'
 
 export interface NsCardProps {
   children: ReactNode
@@ -15,9 +14,9 @@ export function NsCard({ children, className, onClick }: NsCardProps) {
     <div
       onClick={onClick}
       className={cn(
-        'bg-card border border-border rounded-lg group relative flex items-center gap-4 overflow-hidden p-4 transition-all duration-200',
+        'bg-card border-border group relative flex items-center gap-4 overflow-hidden rounded-lg border p-4 transition-all duration-200',
         'hover:border-border-hover/50 hover:shadow-md',
-        'dark:hover:bg-card-hover dark:hover:shadow-none dark:border-transparent',
+        'dark:hover:bg-card-hover dark:border-transparent dark:hover:shadow-none',
         onClick && 'cursor-pointer',
         className,
       )}
@@ -36,7 +35,7 @@ export function NsIcon({
 }) {
   const Icon = icon || User
   return (
-    <div className={cn('relative shrink-0', className)}>
+    <div className={cn('relative shrink-0 self-start', className)}>
       <div className="bg-muted flex size-10 items-center justify-center rounded-full md:size-12">
         <Icon className="size-5 md:size-6" />
       </div>
@@ -103,44 +102,6 @@ export function NsAmount({
   return (
     <div className={cn('flex w-auto justify-end', className)}>
       <CurrencySpan amount={amount} />
-    </div>
-  )
-}
-
-export function NsBody({
-  children,
-  className,
-}: {
-  children: ReactNode
-  className?: string
-}) {
-  if (!children) return null
-  return (
-    <div className={cn('flex flex-col pt-3', className)}>
-      <Separator className="bg-border/40 mb-2 transition-colors group-hover:bg-border/60" />
-      <div className="text-muted-foreground line-clamp-1 text-[11px] font-bold uppercase tracking-widest transition-colors group-hover:text-foreground/80">
-        {children}
-      </div>
-    </div>
-  )
-}
-
-export function NsNote({
-  children,
-  className,
-}: {
-  children: ReactNode
-  className?: string
-}) {
-  if (!children) return null
-  return (
-    <div
-      className={cn(
-        'text-muted-foreground/70 mt-1 line-clamp-1 text-[11px] font-medium leading-relaxed italic',
-        className,
-      )}
-    >
-      {children}
     </div>
   )
 }

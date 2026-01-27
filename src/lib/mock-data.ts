@@ -15,8 +15,8 @@ import {
   TransactionScope,
 } from '@/features/transactions/types'
 import type { User } from '@/features/users/types'
-import type { UUID } from 'crypto'
 import { Car, Film, Home, Users, Utensils, Wallet } from 'lucide-react'
+import type { UUID } from 'node:crypto'
 
 // Users
 export const mockUsers: Array<User> = [
