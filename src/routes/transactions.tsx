@@ -157,16 +157,16 @@ function TransactionSummaryStats({
   const owesText = getOwesText(owes)
 
   return (
-    <div className="flex flex-col justify-center gap-4 w-full xl:w-auto xl:flex-row">
+    <div className="flex w-full flex-col justify-center gap-4 xl:w-auto xl:flex-row">
       <div className="flex flex-row justify-center gap-4 xl:w-auto xl:justify-end">
         <SummaryCell heading="Expense">
-          <span className="font-bold text-expense">
+          <span className="text-expense font-bold">
             <CurrencySpan amount={expense} />
           </span>
         </SummaryCell>
         <Separator orientation="vertical" />
         <SummaryCell heading="Income">
-          <span className="font-bold text-income">
+          <span className="text-income font-bold">
             <CurrencySpan amount={income} />
           </span>
         </SummaryCell>

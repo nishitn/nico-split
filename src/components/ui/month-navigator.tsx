@@ -1,8 +1,12 @@
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover'
+import { Separator } from '@/components/ui/separator'
 import { cn } from '@/lib/utils'
 import { Calendar, ChevronLeft, ChevronRight } from 'lucide-react'
 import { useEffect, useState } from 'react'
-import { Popover, PopoverContent, PopoverTrigger } from './popover'
-import { Separator } from './separator'
 
 export interface MonthNavigatorProps {
   currentMonth: number
@@ -94,11 +98,11 @@ export function MonthNavigator({
                       setOpen(false)
                     }}
                     className={cn(
-                      'relative rounded-xl py-3 text-sm font-semibold transition-all cursor-pointer active:scale-95',
+                      'relative cursor-pointer rounded-xl py-3 text-sm font-semibold transition-all active:scale-95',
                       isSelected
-                        ? 'bg-primary text-primary-foreground shadow-md shadow-primary/30'
+                        ? 'bg-primary text-primary-foreground shadow-primary/30 shadow-md'
                         : isActual
-                          ? 'bg-muted text-muted-foreground border-border border hover:text-foreground'
+                          ? 'bg-muted text-muted-foreground border-border hover:text-foreground border'
                           : 'text-muted-foreground hover:bg-muted hover:text-foreground',
                     )}
                   >
@@ -113,7 +117,7 @@ export function MonthNavigator({
                 setMonthYear(actualMonth, actualYear)
                 setOpen(false)
               }}
-              className="bg-secondary hover:bg-secondary/80 cursor-pointer text-secondary-foreground rounded-lg py-2 text-xs font-bold transition-colors"
+              className="bg-secondary hover:bg-secondary/80 text-secondary-foreground cursor-pointer rounded-lg py-2 text-xs font-bold transition-colors"
             >
               Go to Today
             </button>

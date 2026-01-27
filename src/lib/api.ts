@@ -12,7 +12,7 @@ import {
   GroupTransactionType,
   TransactionScope,
 } from '@/features/transactions/types'
-import type { User } from '@/features/users/types'
+import type { PeopleBalance, User } from '@/features/users/types'
 import {
   mockAccounts,
   mockCategories,
@@ -242,5 +242,29 @@ export const api = {
     })
 
     return categoryStats.filter((c) => c.amount !== 0)
+  },
+
+  getPeopleBalances: async (user: User): Promise<Array<PeopleBalance>> => {
+    const now = new Date()
+    const groupBalances = await api.getGroupBalances(
+      user,
+      now.getMonth(),
+      now.getFullYear(),
+    )
+
+    const peopleMap: Record<string, number> = {}
+
+    groupBalances.forEach((gb) => {
+      Object.entries(gb.overallOwes).forEach(([userId, owes]) => {
+        peopleMap[userId] = (peopleMap[userId] || 0) + owes
+      })
+    })
+
+    return Object.entries(peopleMap)
+      .map(([userId, owes]) => ({
+        user: mockUsers.find((u) => u.id === userId)!,
+        owes,
+      }))
+      .filter((p) => p.owes !== 0)
   },
 }

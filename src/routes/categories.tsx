@@ -162,7 +162,8 @@ function CategorySummaryStats({ income, expense }: CategorySummaryStatsProps) {
           <CurrencySpan amount={expense} />
         </span>
       </SummaryCell>
-      <Separator orientation="vertical" />
+      <Separator orientation="vertical" className="hidden xl:block" />
+      <Separator className="block xl:hidden" />
       <SummaryCell heading="Income">
         <span className="text-income font-bold">
           <CurrencySpan amount={income} />

@@ -1,8 +1,14 @@
+import { CurrencySpan } from '@/components/ui/currency-span'
+import {
+  NsCard,
+  NsContent,
+  NsIcon,
+  NsMainRow,
+  NsSubRow,
+} from '@/components/ui/ns-card'
+import { Separator } from '@/components/ui/separator'
 import { GroupBalance } from '@/features/groups/types'
 import { getOwesColor, getOwesText } from '@/lib/utils'
-import { CurrencySpan } from '../ui/currency-span'
-import { NsCard, NsContent, NsIcon, NsMainRow, NsSubRow } from '../ui/ns-card'
-import { Separator } from '../ui/separator'
 
 export function GroupRow({ groupBalance }: { groupBalance: GroupBalance }) {
   return (
@@ -37,7 +43,7 @@ function GroupSummarySection({ groupBalance }: { groupBalance: GroupBalance }) {
 
   return (
     <>
-      <div className="flex flex-col gap-1 flex-1">
+      <div className="flex flex-1 flex-col gap-1">
         <span className="text-card-foreground">{groupBalance.group.label}</span>
         {owesText !== '' && (
           <span className={owesColor}>
@@ -50,8 +56,8 @@ function GroupSummarySection({ groupBalance }: { groupBalance: GroupBalance }) {
           </span>
         )}
       </div>
-      <div className="flex flex-col gap-1 items-end">
-        <span className="text-muted-foreground uppercase text-sm font-semibold">
+      <div className="flex flex-col items-end gap-1">
+        <span className="text-muted-foreground text-sm font-semibold uppercase">
           This Month
         </span>
         <span className={monthlyOwesColor}>
@@ -75,7 +81,7 @@ function GroupUserOwesRow({ groupBalance }: { groupBalance: GroupBalance }) {
         const remainingCount = entries.length - showLimit
 
         return (
-          <div className="flex flex-col gap-1 w-full">
+          <div className="flex w-full flex-col gap-1">
             {displayEntries.map(([userId, owes]) => {
               const member = groupBalance.group.members.find(
                 (u) => u.id === userId,
@@ -84,7 +90,7 @@ function GroupUserOwesRow({ groupBalance }: { groupBalance: GroupBalance }) {
               const itemOwesText = getOwesText(owes, member)
 
               return (
-                <div key={userId} className="flex flex-row gap-1 w-full">
+                <div key={userId} className="flex w-full flex-row gap-1">
                   <span className="flex-1">{itemOwesText}</span>
                   <span className={itemOwesColor}>
                     <CurrencySpan amount={owes} />
@@ -93,7 +99,7 @@ function GroupUserOwesRow({ groupBalance }: { groupBalance: GroupBalance }) {
               )
             })}
             {remainingCount > 0 && (
-              <div className="text-xs pt-1 text-muted-foreground w-full text-center">
+              <div className="text-muted-foreground w-full pt-1 text-center text-xs">
                 + {remainingCount} others
               </div>
             )}

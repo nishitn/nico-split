@@ -8,11 +8,11 @@ import {
 import * as React from 'react'
 
 // Needed to import icons that were missing
+import { BottomNav } from '@/components/layout/bottom-nav'
+import { MobileHeader } from '@/components/layout/header'
 import { Sidebar } from '@/components/layout/sidebar'
 import type { LucideIcon } from 'lucide-react'
 import { PieChart } from 'lucide-react'
-import { BottomNav } from './bottom-nav'
-import { MobileHeader } from './header'
 
 interface AppLayoutProps {
   children: React.ReactNode
@@ -50,9 +50,9 @@ export function AppLayout({
       <main className="flex min-w-0 flex-1 flex-col md:overflow-hidden">
         <MobileHeader />
 
-        <div className="flex flex-col flex-1 p-4 md:min-h-0 md:overflow-auto md:p-6">
-          <div className="mx-auto w-full max-w-6xl flex flex-col gap-6">
-            <div className="flex justify-between items-center">
+        <div className="flex flex-1 flex-col p-4 md:min-h-0 md:overflow-auto md:p-6">
+          <div className="mx-auto flex w-full max-w-6xl flex-col gap-6">
+            <div className="flex items-center justify-between">
               <div>
                 <h1 className="text-foreground text-2xl font-bold">
                   {routeTitle}

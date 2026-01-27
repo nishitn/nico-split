@@ -1,70 +1,146 @@
-import { createFileRoute } from '@tanstack/react-router'
+import { AccountRow } from '@/components/layout/account-row'
 import { AppLayout } from '@/components/layout/app-layout'
+import { PeopleRow } from '@/components/layout/people-row'
+import { RouteToolbar } from '@/components/layout/route-toolbar'
+import { CurrencySpan } from '@/components/ui/currency-span'
+import { Separator } from '@/components/ui/separator'
+import { SummaryCell } from '@/components/ui/summary-cell'
 import { useAccounts } from '@/features/accounts/api'
+import { useCurrentUser, usePeopleBalances } from '@/features/users/api'
+import { cn, getAmountsColor, getOwesColor, getOwesText } from '@/lib/utils'
+import { createFileRoute } from '@tanstack/react-router'
+import { ReactNode } from 'react'
 
 export const Route = createFileRoute('/accounts')({
   component: AccountsPage,
 })
 
 function AccountsPage() {
-  const { data: accounts, isLoading } = useAccounts()
-  //   const { data: user } = useCurrentUser()
+  // #region Load Data
+  const { data: user } = useCurrentUser()
+  const { data: accounts = [], isLoading: isLoadingAccounts } = useAccounts()
+  const { data: peopleBalances = [], isLoading: isLoadingPeople } =
+    usePeopleBalances(user)
 
-  const totalBalance =
-    accounts?.reduce((acc, curr) => acc + curr.balance, 0) || 0
+  // #endregion
+
+  // #region Calculate Stats
+  const totalBalance = accounts.reduce((sum, acc) => sum + acc.balance, 0)
+
+  const totalYouOwe = peopleBalances
+    .filter((p) => p.owes > 0)
+    .reduce((acc, p) => acc + p.owes, 0)
+
+  const totalLent = peopleBalances
+    .filter((p) => p.owes < 0)
+    .reduce((acc, p) => acc + Math.abs(p.owes), 0)
+
+  // #endregion
+
+  let summaryStats: ReactNode
+  if (isLoadingAccounts || isLoadingPeople) {
+    summaryStats = <div className="text-muted-foreground p-4">Loading...</div>
+  } else {
+    summaryStats = (
+      <AccountsSummaryStats
+        totalBalance={totalBalance}
+        totalOwe={totalYouOwe + totalLent}
+      />
+    )
+  }
+
+  let accountList: ReactNode
+  if (isLoadingAccounts) {
+    accountList = (
+      <div className="text-muted-foreground border-border bg-card rounded-lg border border-dashed p-8 text-center">
+        Loading accounts...
+      </div>
+    )
+  } else if (accounts.length === 0) {
+    accountList = (
+      <div className="text-muted-foreground border-border bg-card rounded-lg border border-dashed p-8 text-center">
+        No Accounts Found
+      </div>
+    )
+  } else {
+    accountList = (
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        {accounts.map((account) => (
+          <AccountRow key={account.id} account={account} />
+        ))}
+      </div>
+    )
+  }
+
+  let peopleList: ReactNode
+  if (isLoadingPeople) {
+    peopleList = (
+      <div className="text-muted-foreground border-border bg-card rounded-lg border border-dashed p-8 text-center">
+        Loading people...
+      </div>
+    )
+  } else if (peopleBalances.length === 0) {
+    peopleList = (
+      <div className="text-muted-foreground border-border bg-card rounded-lg border border-dashed p-8 text-center">
+        No shared balances with anyone.
+      </div>
+    )
+  } else {
+    peopleList = (
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        {peopleBalances.map((pb) => (
+          <PeopleRow key={pb.user.id} peopleBalance={pb} />
+        ))}
+      </div>
+    )
+  }
 
   return (
-    <AppLayout>
-      <div className="flex flex-col gap-6 pb-20 md:pb-0">
-        <h1 className="text-2xl font-bold tracking-tight md:hidden">
-          Accounts
-        </h1>
+    <AppLayout routeTitle="Accounts" routeSubtitle="Your balances and debts">
+      <RouteToolbar>{summaryStats}</RouteToolbar>
 
-        <div className="from-primary/80 rounded-2xl bg-gradient-to-br to-emerald-600 p-6 text-white shadow-lg">
-          <div className="flex flex-col gap-1">
-            <span className="text-sm font-medium opacity-90">
-              Total Balance
-            </span>
-            <span className="text-4xl font-bold">
-              {totalBalance.toLocaleString('en-IN', {
-                style: 'currency',
-                currency: 'INR',
-              })}
-            </span>
-          </div>
-        </div>
+      <div className="flex flex-col gap-8 pb-20 md:pb-8">
+        <section className="flex flex-col gap-4">
+          <h2 className="text-lg font-semibold">Your Accounts</h2>
+          {accountList}
+        </section>
 
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {isLoading ? (
-            <div>Loading accounts...</div>
-          ) : (
-            accounts?.map((account) => (
-              <div
-                key={account.id}
-                className="border-border bg-card hover:bg-muted/30 flex items-center justify-between rounded-xl border p-4 transition-colors"
-              >
-                <div className="flex items-center gap-3">
-                  <div className="bg-secondary flex h-10 w-10 items-center justify-center rounded-full">
-                    <account.icon className="text-foreground h-5 w-5" />
-                  </div>
-                  <div className="flex flex-col">
-                    <span className="font-semibold">{account.label}</span>
-                    <span className="text-muted-foreground text-xs uppercase">
-                      {account.type.replace('_', ' ')}
-                    </span>
-                  </div>
-                </div>
-                <span className="text-lg font-bold">
-                  {account.balance.toLocaleString('en-IN', {
-                    style: 'currency',
-                    currency: account.currency.toUpperCase(),
-                  })}
-                </span>
-              </div>
-            ))
-          )}
-        </div>
+        <section className="flex flex-col gap-4">
+          <h2 className="text-lg font-semibold">People</h2>
+          {peopleList}
+        </section>
       </div>
     </AppLayout>
+  )
+}
+
+interface AccountsSummaryStatsProps {
+  totalBalance: number
+  totalOwe: number
+}
+
+function AccountsSummaryStats({
+  totalBalance,
+  totalOwe,
+}: AccountsSummaryStatsProps) {
+  const balanceColor = getAmountsColor(totalBalance, 'text-card-foreground')
+  const owesColor = getOwesColor(totalOwe, 'text-card-foreground')
+  const owesText = getOwesText(totalOwe)
+
+  return (
+    <div className="flex flex-1 flex-col justify-center gap-4 xl:w-auto xl:flex-row xl:justify-end xl:gap-8">
+      <SummaryCell heading="Total Balance">
+        <span className={cn(balanceColor, 'font-bold')}>
+          <CurrencySpan amount={totalBalance} showSign={true} />
+        </span>
+      </SummaryCell>
+      <Separator orientation="vertical" className="hidden xl:block" />
+      <Separator className="block xl:hidden" />
+      <SummaryCell heading="You Owe">
+        <span className={cn(owesColor, 'font-bold')}>
+          {owesText} <CurrencySpan amount={totalOwe} />
+        </span>
+      </SummaryCell>
+    </div>
   )
 }

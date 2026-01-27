@@ -1,3 +1,4 @@
+import { CurrencySpan } from '@/components/ui/currency-span'
 import {
   NsAmount,
   NsCard,
@@ -6,6 +7,7 @@ import {
   NsMainRow,
   NsSubRow,
 } from '@/components/ui/ns-card'
+import { Separator } from '@/components/ui/separator'
 import { Account } from '@/features/accounts/types'
 import { Category } from '@/features/categories/types'
 import { Group } from '@/features/groups/types'
@@ -25,8 +27,6 @@ import type { User } from '@/features/users/types'
 import { cn, getOwesColor, getOwesText, getUserOwes } from '@/lib/utils'
 import { FileQuestion, LucideIcon, MoveRight, Users } from 'lucide-react'
 import { ReactNode } from 'react'
-import { CurrencySpan } from '../ui/currency-span'
-import { Separator } from '../ui/separator'
 
 interface TransactionItemProps {
   tx: Transaction
@@ -127,12 +127,16 @@ function MetaDataRow({
           <AccountText className="size-3" account={account} />
         </span>
       )}
-      {group && (
-        <span className="flex items-center gap-1 rounded-md bg-muted px-2 text-xs text-muted-foreground">
-          {group.label}
-        </span>
-      )}
+      {group && <GroupLabel group={group} />}
     </>
+  )
+}
+
+function GroupLabel({ group }: { group: Group }) {
+  return (
+    <span className="bg-muted text-muted-foreground flex items-center gap-1 rounded-md px-2 text-xs">
+      {group.label}
+    </span>
   )
 }
 
@@ -214,7 +218,7 @@ export function GroupSplitTransactionItem({
           <span className="flex-1">
             {paidByText} paid <CurrencySpan amount={tx.amount} />
           </span>
-          <span className={cn('flex item-center gap-1', userOwesColor)}>
+          <span className={cn('item-center flex gap-1', userOwesColor)}>
             {userOwesText} <CurrencySpan amount={userOwes} />
           </span>
         </NsSubRow>
@@ -264,7 +268,11 @@ export function GroupTransferTransactionItem({
     groupMetadata.paidBy.id === user.id ? 'text-card-expense' : 'text-income'
 
   const metadataRow = (
-    <GroupTransferRow from={groupMetadata.paidBy} to={groupMetadata.paidTo} />
+    <GroupTransferRow
+      from={groupMetadata.paidBy}
+      to={groupMetadata.paidTo}
+      group={tx.group}
+    />
   )
 
   return (
@@ -285,12 +293,22 @@ export function GroupTransferTransactionItem({
   )
 }
 
-function GroupTransferRow({ from, to }: { from: User; to: User }) {
+function GroupTransferRow({
+  from,
+  to,
+  group,
+}: {
+  from: User
+  to: User
+  group: Group
+}) {
   return (
     <>
       <span className="flex items-center gap-1">{from.name}</span>
       <MoveRight className="size-4" />
       <span className="flex items-center gap-1">{to.name}</span>
+      <span className="text-xs">•</span>
+      <GroupLabel group={group} />
     </>
   )
 }

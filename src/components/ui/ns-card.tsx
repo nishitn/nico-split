@@ -95,13 +95,15 @@ export function NsSubRow({
 export function NsAmount({
   amount,
   className,
+  showSign,
 }: {
   amount: number
   className?: string
+  showSign?: boolean
 }) {
   return (
     <div className={cn('flex w-auto justify-end', className)}>
-      <CurrencySpan amount={amount} />
+      <CurrencySpan amount={amount} showSign={showSign} />
     </div>
   )
 }

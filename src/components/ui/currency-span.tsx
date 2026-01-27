@@ -14,11 +14,16 @@ export function CurrencySpan({
   className,
   showSign = false,
 }: CurrencySpanProps) {
-  const displayAmount = showSign ? amount : Math.abs(amount)
+  const displayAmount = Math.abs(amount)
+  const sign = showSign && amount < 0 ? '-' : ''
   const formatted = new Intl.NumberFormat('en-US', {
     style: 'currency',
     currency,
   }).format(displayAmount)
 
-  return <span className={cn('whitespace-nowrap', className)}>{formatted}</span>
+  return (
+    <span className={cn('whitespace-nowrap', className)}>
+      {sign} {formatted}
+    </span>
+  )
 }

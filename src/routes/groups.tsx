@@ -142,13 +142,14 @@ function GroupSummaryStats({
   const overallOwesColor = getOwesColor(overallOwes, foregroundColor)
 
   return (
-    <div className="flex flex-col justify-center gap-4 w-full xl:w-auto xl:flex-row xl:justify-end xl:gap-8">
+    <div className="flex w-full flex-col justify-center gap-4 xl:w-auto xl:flex-row xl:justify-end xl:gap-8">
       <SummaryCell heading="This Month">
         <span className={cn('font-bold', monthlyOwesColor)}>
           {monthlyOwesText} <CurrencySpan amount={monthlyOwes} />
         </span>
       </SummaryCell>
-      <Separator orientation="vertical" />
+      <Separator orientation="vertical" className="hidden xl:block" />
+      <Separator className="block xl:hidden" />
       <SummaryCell heading="Overall">
         <span className={cn('font-bold', overallOwesColor)}>
           {overallOwesText} <CurrencySpan amount={overallOwes} />
