@@ -128,7 +128,7 @@ function AccountsSummaryStats({
   const owesText = getOwesText(totalOwe)
 
   return (
-    <div className="flex flex-1 flex-col justify-center gap-4 xl:w-auto xl:flex-row xl:justify-end xl:gap-8">
+    <div className="flex w-full flex-1 flex-col justify-center gap-4 xl:w-auto xl:flex-row xl:justify-end xl:gap-8">
       <SummaryCell heading="Total Balance">
         <span className={cn(balanceColor, 'font-bold')}>
           <CurrencySpan amount={totalBalance} showSign={true} />

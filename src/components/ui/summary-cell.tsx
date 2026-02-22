@@ -16,10 +16,10 @@ export function SummaryCell({
     <div
       className={cn(
         className,
-        'flex min-w-25 flex-1 flex-row items-center xl:min-w-40 xl:flex-none xl:flex-col xl:items-end',
+        'flex min-w-25 flex-1 flex-row items-center gap-1 xl:min-w-40 xl:flex-none xl:flex-col xl:items-end',
       )}
     >
-      <span className="text-muted-foreground flex-1 text-xs font-bold uppercase tracking-wider xl:flex-none">
+      <span className="text-muted-foreground flex-1 text-xs font-bold tracking-wider uppercase xl:flex-none">
         {heading}
       </span>
       <div className="flex flex-col items-end justify-center xl:flex-1">
