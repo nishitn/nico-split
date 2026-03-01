@@ -1,6 +1,12 @@
+import {
+  NsAmount,
+  NsCard,
+  NsContent,
+  NsIcon,
+  NsMainRow,
+} from '@/components/ui/ns-card'
 import { Account } from '@/features/accounts/types'
 import { getAmountsColor } from '@/lib/utils'
-import { NsAmount, NsCard, NsContent, NsIcon, NsMainRow } from '@/components/ui/ns-card'
 
 export function AccountRow({ account }: { account: Account }) {
   const amountColor = getAmountsColor(account.balance, 'text-card-foreground')

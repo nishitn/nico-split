@@ -1,6 +1,7 @@
 import { AppLayout } from '@/components/layout/app-layout'
 import { CategoryRow } from '@/components/layout/category-row'
 import { RouteToolbar } from '@/components/layout/route-toolbar'
+import { ActionButton } from '@/components/ui/action-button'
 import { CurrencySpan } from '@/components/ui/currency-span'
 import { MonthNavigator } from '@/components/ui/month-navigator'
 import { Separator } from '@/components/ui/separator'
@@ -8,9 +9,15 @@ import { SummaryCell } from '@/components/ui/summary-cell'
 import { useCategoryStats } from '@/features/categories/api'
 import { useMonthlyStats } from '@/features/transactions/api'
 import { useCurrentUser } from '@/features/users/api'
-import { createFileRoute, useNavigate } from '@tanstack/react-router'
-import { UUID } from 'node:crypto'
-import { ReactNode, useState } from 'react'
+import {
+  createFileRoute,
+  Outlet,
+  useChildMatches,
+  useNavigate,
+} from '@tanstack/react-router'
+import type { UUID } from 'crypto'
+import type { ReactNode } from 'react'
+import { useState } from 'react'
 import { z } from 'zod'
 
 const searchSchema = z.object({
@@ -24,6 +31,8 @@ export const Route = createFileRoute('/categories')({
 })
 
 function CategoriesPage() {
+  const childMatches = useChildMatches()
+
   const navigate = useNavigate({ from: Route.fullPath })
   const search = Route.useSearch()
 
@@ -61,6 +70,10 @@ function CategoriesPage() {
   const [expandedCategories, setExpandedCategories] = useState<
     Record<UUID, boolean>
   >({})
+
+  if (childMatches.length > 0) {
+    return <Outlet />
+  }
 
   const toggleCategory = (categoryId: UUID) => {
     setExpandedCategories((prev) => ({
@@ -130,6 +143,7 @@ function CategoriesPage() {
     <AppLayout
       routeTitle="Categories"
       routeSubtitle="Spending breakdown by category"
+      actionButton={<ActionButton to="/categories/form" text="New Category" />}
     >
       <RouteToolbar>
         <MonthNavigator

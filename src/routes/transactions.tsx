@@ -10,8 +10,14 @@ import { useMonthlyStats, useTransactions } from '@/features/transactions/api'
 import { useCurrentUser } from '@/features/users/api'
 import { dateString, groupTransactionsByDate } from '@/lib/transactions-util'
 import { cn, getAmountsColor, getOwesColor, getOwesText } from '@/lib/utils'
-import { createFileRoute, useNavigate } from '@tanstack/react-router'
-import { ReactNode, useMemo } from 'react'
+import {
+  createFileRoute,
+  Outlet,
+  useChildMatches,
+  useNavigate,
+} from '@tanstack/react-router'
+import type { ReactNode } from 'react'
+import { useMemo } from 'react'
 import { z } from 'zod'
 
 // Schema for search params
@@ -28,11 +34,33 @@ export const Route = createFileRoute('/transactions')({
 function TransactionsPage() {
   const navigate = useNavigate({ from: Route.fullPath })
   const search = Route.useSearch()
+  const childMatches = useChildMatches()
 
   // #region Get Date from search params or use current date
   const currentDate = new Date()
   const month = search.month ? search.month - 1 : currentDate.getMonth()
   const year = search.year ?? currentDate.getFullYear()
+
+  // #region Load Data
+  const { data: user } = useCurrentUser()
+  const { data: transactions = [], isLoading: isTransactionsLoading } =
+    useTransactions(month, year)
+
+  const { data: stats, isLoading: isStatsLoading } = useMonthlyStats(
+    user,
+    month,
+    year,
+  )
+
+  const dayWiseTransactions = useMemo(
+    () => groupTransactionsByDate(transactions, user),
+    [transactions, user],
+  )
+  // #endregion
+
+  if (childMatches.length > 0) {
+    return <Outlet />
+  }
 
   const setMonthYear = (newMonth: number, newYear: number) => {
     const isCurrent =
@@ -46,28 +74,8 @@ function TransactionsPage() {
     })
   }
 
-  // #endregion
-
-  // #region Load Data
-  const { data: user } = useCurrentUser()
-  const { data: transactions = [], isLoading: isTransactionsLoading } =
-    useTransactions(month, year)
-
   if (!user)
     return <div className="flex justify-center p-8">Loading user...</div>
-
-  const { data: stats, isLoading: isStatsLoading } = useMonthlyStats(
-    user,
-    month,
-    year,
-  )
-
-  const dayWiseTransactions = useMemo(
-    () => groupTransactionsByDate(transactions, user),
-    [transactions, user],
-  )
-
-  // #endregion
 
   let summaryStats: ReactNode
   if (isStatsLoading) {
@@ -117,7 +125,7 @@ function TransactionsPage() {
       routeTitle="Dashboard"
       routeSubtitle="Overview of your monthly transactions"
       actionButton={
-        <ActionButton to="/transactions/new" text="New Transaction" />
+        <ActionButton to="/transactions/form" text="New Transaction" />
       }
     >
       <RouteToolbar>

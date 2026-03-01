@@ -9,9 +9,10 @@ import {
   NsSubRow,
 } from '@/components/ui/ns-card'
 import { Separator } from '@/components/ui/separator'
-import { CategoryStat, CategoryType } from '@/features/categories/types'
+import type { CategoryStat } from '@/features/categories/types'
+import { CategoryType } from '@/features/categories/types'
+import type { UUID } from 'crypto'
 import { ChevronDown, ChevronUp } from 'lucide-react'
-import { UUID } from 'node:crypto'
 
 export interface CategoryRowProps {
   categoryStat: CategoryStat

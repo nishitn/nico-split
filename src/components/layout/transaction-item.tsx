@@ -8,9 +8,9 @@ import {
   NsSubRow,
 } from '@/components/ui/ns-card'
 import { Separator } from '@/components/ui/separator'
-import { Account } from '@/features/accounts/types'
-import { Category } from '@/features/categories/types'
-import { Group } from '@/features/groups/types'
+import type { Account } from '@/features/accounts/types'
+import type { Category } from '@/features/categories/types'
+import type { Group } from '@/features/groups/types'
 import type {
   GroupSplitMetadata,
   GroupTransaction,
@@ -25,8 +25,9 @@ import {
 } from '@/features/transactions/types'
 import type { User } from '@/features/users/types'
 import { cn, getOwesColor, getOwesText, getUserOwes } from '@/lib/utils'
-import { FileQuestion, LucideIcon, MoveRight, Users } from 'lucide-react'
-import { ReactNode } from 'react'
+import type { LucideIcon } from 'lucide-react'
+import { FileQuestion, MoveRight, Users } from 'lucide-react'
+import type { ReactNode } from 'react'
 
 interface TransactionItemProps {
   tx: Transaction

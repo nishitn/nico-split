@@ -9,7 +9,7 @@ import { useGroupBalances } from '@/features/groups/api'
 import { useCurrentUser } from '@/features/users/api'
 import { cn, getOwesColor, getOwesText } from '@/lib/utils'
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
-import { ReactNode } from 'react'
+import type { ReactNode } from 'react'
 import { z } from 'zod'
 
 const groupsSearchSchema = z.object({

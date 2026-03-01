@@ -2,14 +2,19 @@ import { AccountRow } from '@/components/layout/account-row'
 import { AppLayout } from '@/components/layout/app-layout'
 import { PeopleRow } from '@/components/layout/people-row'
 import { RouteToolbar } from '@/components/layout/route-toolbar'
+import { ActionButton } from '@/components/ui/action-button'
 import { CurrencySpan } from '@/components/ui/currency-span'
 import { Separator } from '@/components/ui/separator'
 import { SummaryCell } from '@/components/ui/summary-cell'
 import { useAccounts } from '@/features/accounts/api'
 import { useCurrentUser, usePeopleBalances } from '@/features/users/api'
 import { cn, getAmountsColor, getOwesColor, getOwesText } from '@/lib/utils'
-import { createFileRoute } from '@tanstack/react-router'
-import { ReactNode } from 'react'
+import {
+  createFileRoute,
+  Outlet,
+  useChildMatches,
+} from '@tanstack/react-router'
+import type { ReactNode } from 'react'
 
 export const Route = createFileRoute('/accounts')({
   component: AccountsPage,
@@ -23,6 +28,11 @@ function AccountsPage() {
     usePeopleBalances(user)
 
   // #endregion
+
+  const childMatches = useChildMatches()
+  if (childMatches.length > 0) {
+    return <Outlet />
+  }
 
   // #region Calculate Stats
   const totalBalance = accounts.reduce((sum, acc) => sum + acc.balance, 0)
@@ -96,7 +106,11 @@ function AccountsPage() {
   }
 
   return (
-    <AppLayout routeTitle="Accounts" routeSubtitle="Your balances and debts">
+    <AppLayout
+      routeTitle="Accounts"
+      routeSubtitle="Your balances and debts"
+      actionButton={<ActionButton to="/accounts/form" text="New Account" />}
+    >
       <RouteToolbar>{summaryStats}</RouteToolbar>
 
       <div className="flex flex-col gap-8 pb-20 md:pb-8">

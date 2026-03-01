@@ -17,6 +17,10 @@ import { Route as CategoriesRouteImport } from './routes/categories'
 import { Route as BudgetRouteImport } from './routes/budget'
 import { Route as AccountsRouteImport } from './routes/accounts'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as TransactionsFormRouteImport } from './routes/transactions/form'
+import { Route as ChaptersFormRouteImport } from './routes/chapters/form'
+import { Route as CategoriesFormRouteImport } from './routes/categories/form'
+import { Route as AccountsFormRouteImport } from './routes/accounts/form'
 
 const TransactionsRoute = TransactionsRouteImport.update({
   id: '/transactions',
@@ -58,37 +62,69 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const TransactionsFormRoute = TransactionsFormRouteImport.update({
+  id: '/form',
+  path: '/form',
+  getParentRoute: () => TransactionsRoute,
+} as any)
+const ChaptersFormRoute = ChaptersFormRouteImport.update({
+  id: '/chapters/form',
+  path: '/chapters/form',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CategoriesFormRoute = CategoriesFormRouteImport.update({
+  id: '/form',
+  path: '/form',
+  getParentRoute: () => CategoriesRoute,
+} as any)
+const AccountsFormRoute = AccountsFormRouteImport.update({
+  id: '/form',
+  path: '/form',
+  getParentRoute: () => AccountsRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/accounts': typeof AccountsRoute
+  '/accounts': typeof AccountsRouteWithChildren
   '/budget': typeof BudgetRoute
-  '/categories': typeof CategoriesRoute
+  '/categories': typeof CategoriesRouteWithChildren
   '/charts': typeof ChartsRoute
   '/groups': typeof GroupsRoute
   '/more': typeof MoreRoute
-  '/transactions': typeof TransactionsRoute
+  '/transactions': typeof TransactionsRouteWithChildren
+  '/accounts/form': typeof AccountsFormRoute
+  '/categories/form': typeof CategoriesFormRoute
+  '/chapters/form': typeof ChaptersFormRoute
+  '/transactions/form': typeof TransactionsFormRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/accounts': typeof AccountsRoute
+  '/accounts': typeof AccountsRouteWithChildren
   '/budget': typeof BudgetRoute
-  '/categories': typeof CategoriesRoute
+  '/categories': typeof CategoriesRouteWithChildren
   '/charts': typeof ChartsRoute
   '/groups': typeof GroupsRoute
   '/more': typeof MoreRoute
-  '/transactions': typeof TransactionsRoute
+  '/transactions': typeof TransactionsRouteWithChildren
+  '/accounts/form': typeof AccountsFormRoute
+  '/categories/form': typeof CategoriesFormRoute
+  '/chapters/form': typeof ChaptersFormRoute
+  '/transactions/form': typeof TransactionsFormRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/accounts': typeof AccountsRoute
+  '/accounts': typeof AccountsRouteWithChildren
   '/budget': typeof BudgetRoute
-  '/categories': typeof CategoriesRoute
+  '/categories': typeof CategoriesRouteWithChildren
   '/charts': typeof ChartsRoute
   '/groups': typeof GroupsRoute
   '/more': typeof MoreRoute
-  '/transactions': typeof TransactionsRoute
+  '/transactions': typeof TransactionsRouteWithChildren
+  '/accounts/form': typeof AccountsFormRoute
+  '/categories/form': typeof CategoriesFormRoute
+  '/chapters/form': typeof ChaptersFormRoute
+  '/transactions/form': typeof TransactionsFormRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -101,6 +137,10 @@ export interface FileRouteTypes {
     | '/groups'
     | '/more'
     | '/transactions'
+    | '/accounts/form'
+    | '/categories/form'
+    | '/chapters/form'
+    | '/transactions/form'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -111,6 +151,10 @@ export interface FileRouteTypes {
     | '/groups'
     | '/more'
     | '/transactions'
+    | '/accounts/form'
+    | '/categories/form'
+    | '/chapters/form'
+    | '/transactions/form'
   id:
     | '__root__'
     | '/'
@@ -121,17 +165,22 @@ export interface FileRouteTypes {
     | '/groups'
     | '/more'
     | '/transactions'
+    | '/accounts/form'
+    | '/categories/form'
+    | '/chapters/form'
+    | '/transactions/form'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  AccountsRoute: typeof AccountsRoute
+  AccountsRoute: typeof AccountsRouteWithChildren
   BudgetRoute: typeof BudgetRoute
-  CategoriesRoute: typeof CategoriesRoute
+  CategoriesRoute: typeof CategoriesRouteWithChildren
   ChartsRoute: typeof ChartsRoute
   GroupsRoute: typeof GroupsRoute
   MoreRoute: typeof MoreRoute
-  TransactionsRoute: typeof TransactionsRoute
+  TransactionsRoute: typeof TransactionsRouteWithChildren
+  ChaptersFormRoute: typeof ChaptersFormRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -192,18 +241,83 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/transactions/form': {
+      id: '/transactions/form'
+      path: '/form'
+      fullPath: '/transactions/form'
+      preLoaderRoute: typeof TransactionsFormRouteImport
+      parentRoute: typeof TransactionsRoute
+    }
+    '/chapters/form': {
+      id: '/chapters/form'
+      path: '/chapters/form'
+      fullPath: '/chapters/form'
+      preLoaderRoute: typeof ChaptersFormRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/categories/form': {
+      id: '/categories/form'
+      path: '/form'
+      fullPath: '/categories/form'
+      preLoaderRoute: typeof CategoriesFormRouteImport
+      parentRoute: typeof CategoriesRoute
+    }
+    '/accounts/form': {
+      id: '/accounts/form'
+      path: '/form'
+      fullPath: '/accounts/form'
+      preLoaderRoute: typeof AccountsFormRouteImport
+      parentRoute: typeof AccountsRoute
+    }
   }
 }
 
+interface AccountsRouteChildren {
+  AccountsFormRoute: typeof AccountsFormRoute
+}
+
+const AccountsRouteChildren: AccountsRouteChildren = {
+  AccountsFormRoute: AccountsFormRoute,
+}
+
+const AccountsRouteWithChildren = AccountsRoute._addFileChildren(
+  AccountsRouteChildren,
+)
+
+interface CategoriesRouteChildren {
+  CategoriesFormRoute: typeof CategoriesFormRoute
+}
+
+const CategoriesRouteChildren: CategoriesRouteChildren = {
+  CategoriesFormRoute: CategoriesFormRoute,
+}
+
+const CategoriesRouteWithChildren = CategoriesRoute._addFileChildren(
+  CategoriesRouteChildren,
+)
+
+interface TransactionsRouteChildren {
+  TransactionsFormRoute: typeof TransactionsFormRoute
+}
+
+const TransactionsRouteChildren: TransactionsRouteChildren = {
+  TransactionsFormRoute: TransactionsFormRoute,
+}
+
+const TransactionsRouteWithChildren = TransactionsRoute._addFileChildren(
+  TransactionsRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  AccountsRoute: AccountsRoute,
+  AccountsRoute: AccountsRouteWithChildren,
   BudgetRoute: BudgetRoute,
-  CategoriesRoute: CategoriesRoute,
+  CategoriesRoute: CategoriesRouteWithChildren,
   ChartsRoute: ChartsRoute,
   GroupsRoute: GroupsRoute,
   MoreRoute: MoreRoute,
-  TransactionsRoute: TransactionsRoute,
+  TransactionsRoute: TransactionsRouteWithChildren,
+  ChaptersFormRoute: ChaptersFormRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

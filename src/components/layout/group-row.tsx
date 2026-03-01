@@ -7,7 +7,7 @@ import {
   NsSubRow,
 } from '@/components/ui/ns-card'
 import { Separator } from '@/components/ui/separator'
-import { GroupBalance } from '@/features/groups/types'
+import type { GroupBalance } from '@/features/groups/types'
 import { getOwesColor, getOwesText } from '@/lib/utils'
 
 export function GroupRow({ groupBalance }: { groupBalance: GroupBalance }) {

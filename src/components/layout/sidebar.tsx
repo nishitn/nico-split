@@ -14,7 +14,7 @@ import {
 import { NavLink } from '@/components/ui/nav-link'
 import { Separator } from '@/components/ui/separator'
 import { useCurrentUser } from '@/features/users/api'
-import { User } from '@/features/users/types'
+import type { User } from '@/features/users/types'
 import { Link } from '@tanstack/react-router'
 import { CircleUser, LogOut, Settings } from 'lucide-react'
 import { Suspense } from 'react'
@@ -29,7 +29,7 @@ function ProfileSection({ currentUser }: { currentUser: User }) {
       <DropdownMenuTrigger asChild>
         <Button
           variant="outline"
-          className="h-12 w-full justify-start gap-2 p-2 cursor-pointer"
+          className="h-12 w-full cursor-pointer justify-start gap-2 p-2"
         >
           <Avatar className="h-8 w-8 items-center justify-center">
             <AvatarImage src="" />
@@ -46,12 +46,12 @@ function ProfileSection({ currentUser }: { currentUser: User }) {
         <DropdownMenuLabel>Options</DropdownMenuLabel>
         <DropdownMenuSeparator />
         <Link to=".">
-          <DropdownMenuItem className="flex items-center gap-4 w-full cursor-pointer">
+          <DropdownMenuItem className="flex w-full cursor-pointer items-center gap-4">
             <CircleUser className="h-4 w-4" /> Profile
           </DropdownMenuItem>
         </Link>
         <Link to=".">
-          <DropdownMenuItem className="flex items-center gap-4 w-full cursor-pointer">
+          <DropdownMenuItem className="flex w-full cursor-pointer items-center gap-4">
             <Settings className="h-4 w-4" /> Settings
           </DropdownMenuItem>
         </Link>

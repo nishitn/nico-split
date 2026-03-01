@@ -1,4 +1,4 @@
-import { NavItem } from '@/components/layout/app-layout'
+import type { NavItem } from '@/components/layout/app-layout'
 import { NavLink } from '@/components/ui/nav-link'
 import { MoreHorizontal } from 'lucide-react'
 

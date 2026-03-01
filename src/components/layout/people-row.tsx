@@ -1,6 +1,6 @@
 import { CurrencySpan } from '@/components/ui/currency-span'
 import { NsCard, NsContent, NsIcon, NsMainRow } from '@/components/ui/ns-card'
-import { PeopleBalance } from '@/features/users/types'
+import type { PeopleBalance } from '@/features/users/types'
 import { getOwesColor, getOwesText } from '@/lib/utils'
 import { User } from 'lucide-react'
 

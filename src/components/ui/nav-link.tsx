@@ -16,7 +16,7 @@ export function NavLink({
           'text-muted-foreground hover:bg-sidebar-accent hover:text-foreground',
       }}
       className={
-        'flex items-center gap-2 rounded-md p-2 text-sm flex-col md:flex-row w-full'
+        'flex w-full flex-col items-center gap-2 rounded-md p-2 text-sm md:flex-row'
       }
     >
       {children}

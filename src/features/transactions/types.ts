@@ -1,8 +1,8 @@
-import type { UUID } from 'node:crypto'
 import type { Account, Currency } from '@/features/accounts/types'
 import type { Category } from '@/features/categories/types'
 import type { Group } from '@/features/groups/types'
 import type { User } from '@/features/users/types'
+import type { UUID } from 'crypto'
 
 export interface BaseTransaction {
   id: UUID

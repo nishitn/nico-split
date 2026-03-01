@@ -4,7 +4,7 @@ import { Wallet } from 'lucide-react'
 export function MobileHeader() {
   return (
     <header className="bg-background sticky top-0 z-10 flex h-16 items-center justify-between md:hidden">
-      <div className="flex flex-col w-full">
+      <div className="flex w-full flex-col">
         <div className="flex items-center gap-2 px-4">
           <MainLogo />
         </div>

@@ -142,3 +142,21 @@
     @apply h-full font-sans;
   }
 }
+
+/* Custom Time Picker Styling */
+input[type='time']::-webkit-calendar-picker-indicator {
+  order: -1;
+  filter: invert(1);
+  margin-right: 0.5rem;
+  margin-left: 0;
+  cursor: pointer;
+}
+
+input[type='time']::-webkit-datetime-edit {
+  padding-left: 0.25rem;
+}
+
+input[type='time'] {
+  display: flex !important;
+  align-items: center;
+}
