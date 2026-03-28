@@ -10,6 +10,7 @@ export function NavLink({
   return (
     <Link
       to={href}
+      activeOptions={{ exact: true }}
       activeProps={{ className: 'bg-primary/10 text-primary' }}
       inactiveProps={{
         className:

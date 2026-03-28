@@ -1,5 +1,7 @@
+import { getActiveFormContext } from '@/components/layout/layout-route'
 import type { NavItem } from '@/components/layout/app-layout'
 import { NavLink } from '@/components/ui/nav-link'
+import { useLocation } from '@tanstack/react-router'
 import { MoreHorizontal } from 'lucide-react'
 
 export interface BottomNavProps {
@@ -7,6 +9,13 @@ export interface BottomNavProps {
 }
 
 export function BottomNav({ navItems }: BottomNavProps) {
+  const location = useLocation()
+  const activeForm = getActiveFormContext(location.pathname, location.searchStr)
+
+  if (activeForm) {
+    return null
+  }
+
   return (
     <div className="border-border bg-background pb-safe fixed right-0 bottom-0 left-0 z-20 flex h-16 items-center justify-around border-t md:hidden">
       {navItems.slice(0, 4).map((item) => (

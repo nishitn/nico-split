@@ -109,6 +109,7 @@ function AccountsPage() {
     <AppLayout
       routeTitle="Accounts"
       routeSubtitle="Your balances and debts"
+      mobileAction={{ to: '/accounts/form', text: 'New Account' }}
       actionButton={<ActionButton to="/accounts/form" text="New Account" />}
     >
       <RouteToolbar>{summaryStats}</RouteToolbar>

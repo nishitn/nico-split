@@ -1,6 +1,7 @@
 import { AppLayout } from '@/components/layout/app-layout'
 import { GroupRow } from '@/components/layout/group-row'
 import { RouteToolbar } from '@/components/layout/route-toolbar'
+import { ActionButton } from '@/components/ui/action-button'
 import { CurrencySpan } from '@/components/ui/currency-span'
 import { MonthNavigator } from '@/components/ui/month-navigator'
 import { Separator } from '@/components/ui/separator'
@@ -8,7 +9,12 @@ import { SummaryCell } from '@/components/ui/summary-cell'
 import { useGroupBalances } from '@/features/groups/api'
 import { useCurrentUser } from '@/features/users/api'
 import { cn, getOwesColor, getOwesText } from '@/lib/utils'
-import { createFileRoute, useNavigate } from '@tanstack/react-router'
+import {
+  Outlet,
+  createFileRoute,
+  useChildMatches,
+  useNavigate,
+} from '@tanstack/react-router'
 import type { ReactNode } from 'react'
 import { z } from 'zod'
 
@@ -25,6 +31,7 @@ export const Route = createFileRoute('/groups')({
 function GroupsPage() {
   const navigate = useNavigate({ from: Route.fullPath })
   const search = Route.useSearch()
+  const childMatches = useChildMatches()
 
   // #region Get Date from search params or use current date
   const currentDate = new Date()
@@ -51,6 +58,10 @@ function GroupsPage() {
     useGroupBalances(user, month, year)
 
   // #endregion
+
+  if (childMatches.length > 0) {
+    return <Outlet />
+  }
 
   if (!user) return <div className="flex justify-center p-8">Loading...</div>
 
@@ -108,6 +119,8 @@ function GroupsPage() {
     <AppLayout
       routeTitle="Groups"
       routeSubtitle="Balances across your shared groups"
+      mobileAction={{ to: '/groups/form', text: 'New Group' }}
+      actionButton={<ActionButton to="/groups/form" text="New Group" />}
     >
       <RouteToolbar>
         <MonthNavigator

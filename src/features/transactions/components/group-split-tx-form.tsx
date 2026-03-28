@@ -436,7 +436,10 @@ function SplitTypeSelect({
           <ChevronDownIcon className="text-muted-foreground size-4 shrink-0" />
         </button>
       </PopoverTrigger>
-      <PopoverContent align="start" className="w-[var(--radix-popover-trigger-width)] p-0">
+      <PopoverContent
+        align="start"
+        className="w-[var(--radix-popover-trigger-width)] p-0"
+      >
         <PopoverHeader className="p-4 pb-0">
           <PopoverTitle>How should this be split?</PopoverTitle>
           <PopoverDescription>

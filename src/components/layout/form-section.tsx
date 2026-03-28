@@ -1,5 +1,5 @@
 export interface FormSectionProps {
-  heading: string
+  heading?: string
   children: React.ReactNode
 }
 

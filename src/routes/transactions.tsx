@@ -124,6 +124,7 @@ function TransactionsPage() {
     <AppLayout
       routeTitle="Dashboard"
       routeSubtitle="Overview of your monthly transactions"
+      mobileAction={{ to: '/transactions/form', text: 'New Transaction' }}
       actionButton={
         <ActionButton to="/transactions/form" text="New Transaction" />
       }

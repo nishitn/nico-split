@@ -16,3 +16,13 @@ export function ActionButton({ to, text }: ActionButtonProps) {
     </Link>
   )
 }
+
+export function MobileActionFab({ to, text }: ActionButtonProps) {
+  return (
+    <Link to={to} aria-label={text}>
+      <Button className="fixed right-5 bottom-22 z-30 flex h-18 w-18 rounded-2xl shadow-xl transition-transform active:scale-95 md:hidden">
+        <Plus className="size-8 stroke-2" />
+      </Button>
+    </Link>
+  )
+}

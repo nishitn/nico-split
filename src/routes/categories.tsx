@@ -143,6 +143,7 @@ function CategoriesPage() {
     <AppLayout
       routeTitle="Categories"
       routeSubtitle="Spending breakdown by category"
+      mobileAction={{ to: '/categories/form', text: 'New Category' }}
       actionButton={<ActionButton to="/categories/form" text="New Category" />}
     >
       <RouteToolbar>

@@ -1,3 +1,4 @@
+import { getActiveFormContext } from '@/components/layout/layout-route'
 import type { NavItem } from '@/components/layout/app-layout'
 import { MainLogo } from '@/components/layout/header'
 import { ModeToggle } from '@/components/mode-toggle'
@@ -15,7 +16,7 @@ import { NavLink } from '@/components/ui/nav-link'
 import { Separator } from '@/components/ui/separator'
 import { useCurrentUser } from '@/features/users/api'
 import type { User } from '@/features/users/types'
-import { Link } from '@tanstack/react-router'
+import { Link, useLocation } from '@tanstack/react-router'
 import { CircleUser, LogOut, Settings } from 'lucide-react'
 import { Suspense } from 'react'
 
@@ -67,6 +68,8 @@ function ProfileSection({ currentUser }: { currentUser: User }) {
 
 export function Sidebar({ navItems }: SidebarProps) {
   const { data: currentUser } = useCurrentUser()
+  const location = useLocation()
+  const activeForm = getActiveFormContext(location.pathname, location.searchStr)
 
   return (
     <aside className="border-sidebar-border bg-sidebar text-sidebar-foreground sticky top-0 hidden h-screen w-64 flex-col gap-4 border-r p-4 md:flex">
@@ -77,10 +80,20 @@ export function Sidebar({ navItems }: SidebarProps) {
 
       <nav className="flex flex-1 flex-col gap-2">
         {navItems.map((item) => (
-          <NavLink key={item.href} href={item.href}>
-            <item.icon className="h-4 w-4" />
-            {item.label}
-          </NavLink>
+          <div key={item.href} className="flex flex-col gap-1">
+            <NavLink href={item.href}>
+              <item.icon className="h-4 w-4" />
+              {item.label}
+            </NavLink>
+            {activeForm?.parentHref === item.href && (
+              <div className="ml-5 flex items-stretch gap-3 pl-3">
+                <div className="bg-border w-px self-stretch" />
+                <div className="bg-primary/10 text-primary flex flex-1 items-center rounded-md px-3 py-2 text-sm font-medium">
+                  <span>{activeForm.label}</span>
+                </div>
+              </div>
+            )}
+          </div>
         ))}
       </nav>
 
