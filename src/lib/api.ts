@@ -1,5 +1,36 @@
+import {
+  getAccounts as getAccountsServer,
+  getCategories as getCategoriesServer,
+  getCategoryStats as getCategoryStatsServer,
+  getChapters as getChaptersServer,
+  getCurrentUser as getCurrentUserServer,
+  getDatabaseTablePreview as getDatabaseTablePreviewServer,
+  getDatabaseTables as getDatabaseTablesServer,
+  getGroupBalances as getGroupBalancesServer,
+  getGroups as getGroupsServer,
+  getMonthlyStats as getMonthlyStatsServer,
+  getPeopleBalances as getPeopleBalancesServer,
+  getTransactions as getTransactionsServer,
+  getUsers as getUsersServer,
+} from '../../backend/functions'
+import type {
+  AccountDto,
+  CategoryDto,
+  CategoryStatDto,
+  ChapterDto,
+  DatabaseTableDto,
+  DatabaseTablePreviewDto,
+  GroupBalanceDto,
+  GroupDto,
+  MonthlyStatsDto,
+  PeopleBalanceDto,
+  TransactionDto,
+  UserDto,
+} from '../../backend/contracts'
 import type { Account } from '@/features/accounts/types'
+import { AccountType, Currency } from '@/features/accounts/types'
 import type { Category, CategoryStat } from '@/features/categories/types'
+import { CategoryType } from '@/features/categories/types'
 import type { Chapter } from '@/features/chapters/types'
 import type { Group, GroupBalance } from '@/features/groups/types'
 import type {
@@ -10,65 +41,190 @@ import type {
 } from '@/features/transactions/types'
 import {
   GroupTransactionType,
+  PersonalTransactionType,
   TransactionScope,
 } from '@/features/transactions/types'
 import type { PeopleBalance, User } from '@/features/users/types'
-import {
-  mockAccounts,
-  mockCategories,
-  mockChapters,
-  mockGroups,
-  mockTransactions,
-  mockUsers,
-} from '@/lib/mock-data'
-import { getSettlement, getUserAmounts, getUserOwes } from '@/lib/utils'
+import { getIcon } from '@/lib/icon-map'
+import type { UUID } from 'crypto'
 
-const DELAY = 150
+const asUuid = (value: string) => value as UUID
 
-const delay = (ms: number = DELAY) =>
-  new Promise((resolve) => setTimeout(resolve, ms))
+function hydrateUser(user: UserDto): User {
+  return {
+    id: asUuid(user.id),
+    name: user.name,
+  }
+}
+
+function hydrateAccount(account: AccountDto): Account {
+  return {
+    id: asUuid(account.id),
+    label: account.label,
+    type: account.type as AccountType,
+    icon: getIcon(account.iconName),
+    currency: account.currency as Currency,
+    balance: account.balance,
+  }
+}
+
+function hydrateCategory(category: CategoryDto): Category {
+  return {
+    id: asUuid(category.id),
+    label: category.label,
+    type: category.type as CategoryType,
+    icon: getIcon(category.iconName),
+    subCategories: category.subCategories.map(asUuid),
+  }
+}
+
+function hydrateChapter(chapter: ChapterDto): Chapter {
+  return {
+    id: asUuid(chapter.id),
+    label: chapter.label,
+  }
+}
+
+function hydrateGroup(group: GroupDto): Group {
+  return {
+    id: asUuid(group.id),
+    label: group.label,
+    icon: getIcon(group.iconName),
+    members: group.members.map(hydrateUser),
+  }
+}
+
+function hydrateCategoryStat(categoryStat: CategoryStatDto): CategoryStat {
+  return {
+    category: hydrateCategory(categoryStat.category),
+    amount: categoryStat.amount,
+    isSubcategory: categoryStat.isSubcategory,
+    subcategories: categoryStat.subcategories.map(hydrateCategoryStat),
+  }
+}
+
+function hydrateGroupBalance(groupBalance: GroupBalanceDto): GroupBalance {
+  return {
+    group: hydrateGroup(groupBalance.group),
+    monthlyOwes: groupBalance.monthlyOwes,
+    overallOwes: groupBalance.overallOwes,
+    balance: groupBalance.balance,
+  }
+}
+
+function hydrateTransaction(transaction: TransactionDto): Transaction {
+  const baseTransaction = {
+    id: asUuid(transaction.id),
+    dateTime: new Date(transaction.dateTime),
+    currency: transaction.currency as Currency,
+    amount: transaction.amount,
+    note: transaction.note,
+    createdBy: hydrateUser(transaction.createdBy),
+  }
+
+  if (transaction.scope === 'personal') {
+    return {
+      ...baseTransaction,
+      scope: TransactionScope.PERSONAL,
+      type: transaction.type as PersonalTransactionType,
+      metadata: {
+        account: hydrateAccount(transaction.metadata.account),
+        category: transaction.metadata.category
+          ? hydrateCategory(transaction.metadata.category)
+          : undefined,
+        toAccount: transaction.metadata.toAccount
+          ? hydrateAccount(transaction.metadata.toAccount)
+          : undefined,
+      },
+    }
+  }
+
+  return {
+    ...baseTransaction,
+    group: hydrateGroup(transaction.group),
+    scope: TransactionScope.GROUP,
+    type: transaction.type as GroupTransactionType,
+    groupMetadata:
+      transaction.type === GroupTransactionType.SPLIT
+        ? ({
+            paidBy: transaction.groupMetadata.paidBy,
+            split: transaction.groupMetadata.split,
+            category: transaction.groupMetadata.category
+              ? hydrateCategory(transaction.groupMetadata.category)
+              : undefined,
+          } satisfies GroupSplitMetadata)
+        : ({
+            paidBy: hydrateUser(transaction.groupMetadata.paidBy),
+            paidTo: hydrateUser(transaction.groupMetadata.paidTo),
+          } satisfies GroupTransferMetadata),
+    userMetadata: {
+      account: hydrateAccount(transaction.userMetadata.account),
+      category: transaction.userMetadata.category
+        ? hydrateCategory(transaction.userMetadata.category)
+        : undefined,
+      toAccount: transaction.userMetadata.toAccount
+        ? hydrateAccount(transaction.userMetadata.toAccount)
+        : undefined,
+    },
+  }
+}
+
+function hydrateMonthlyStats(stats: MonthlyStatsDto): MonthlyStats {
+  return stats
+}
+
+function hydratePeopleBalance(balance: PeopleBalanceDto): PeopleBalance {
+  return {
+    user: hydrateUser(balance.user),
+    owes: balance.owes,
+  }
+}
+
+function hydrateDatabaseTable(table: DatabaseTableDto) {
+  return table
+}
+
+function hydrateDatabaseTablePreview(preview: DatabaseTablePreviewDto) {
+  return preview
+}
 
 export const api = {
   getUsers: async (): Promise<Array<User>> => {
-    await delay()
-    return [...mockUsers]
+    return (await getUsersServer()).map(hydrateUser)
   },
 
   getCurrentUser: async (): Promise<User> => {
-    await delay()
-    return mockUsers[0]
+    return hydrateUser(await getCurrentUserServer())
   },
 
   getAccounts: async (): Promise<Array<Account>> => {
-    await delay()
-    return [...mockAccounts]
+    return (await getAccountsServer()).map(hydrateAccount)
   },
 
   getCategories: async (): Promise<Array<Category>> => {
-    await delay()
-    return [...mockCategories]
+    return (await getCategoriesServer()).map(hydrateCategory)
   },
 
   getChapters: async (): Promise<Array<Chapter>> => {
-    await delay()
-    return [...mockChapters]
+    return (await getChaptersServer()).map(hydrateChapter)
   },
 
   getGroups: async (): Promise<Array<Group>> => {
-    await delay()
-    return [...mockGroups]
+    return (await getGroupsServer()).map(hydrateGroup)
   },
 
   getTransactions: async (
     month: number,
     year: number,
   ): Promise<Array<Transaction>> => {
-    await delay()
-    return mockTransactions.filter((tx) => {
-      return (
-        tx.dateTime.getMonth() === month && tx.dateTime.getFullYear() === year
-      )
-    })
+    return (
+      await getTransactionsServer({
+        data: {
+          month,
+          year,
+        },
+      })
+    ).map(hydrateTransaction)
   },
 
   getGroupBalances: async (
@@ -76,86 +232,15 @@ export const api = {
     month: number,
     year: number,
   ): Promise<Array<GroupBalance>> => {
-    await delay()
-
-    const groupBalances: Array<GroupBalance> = []
-
-    for (const group of mockGroups) {
-      const monthlyOwes: Record<string, number> = {}
-      const overallOwes: Record<string, number> = {}
-
-      const monthlyNet: Record<string, number> = {}
-      const overallNet: Record<string, number> = {}
-
-      group.members.forEach((member) => {
-        monthlyNet[member.id] = 0
-        overallNet[member.id] = 0
+    return (
+      await getGroupBalancesServer({
+        data: {
+          userId: user.id,
+          month,
+          year,
+        },
       })
-
-      const groupTransactions = mockTransactions.filter(
-        (transaction) =>
-          transaction.scope === TransactionScope.GROUP &&
-          transaction.group.id === group.id,
-      )
-
-      // Calculate net balances for each member
-      groupTransactions.forEach((tx) => {
-        const isCurrentMonth =
-          tx.dateTime.getMonth() === month && tx.dateTime.getFullYear() === year
-
-        if (tx.type === GroupTransactionType.SPLIT) {
-          const { paidBy, split } = tx.groupMetadata as GroupSplitMetadata
-
-          // Calculate net for each member (what they paid - what they owe)
-          group.members.forEach((member) => {
-            const net = getUserOwes(member, paidBy, split)
-            overallNet[member.id] += net
-            if (isCurrentMonth) monthlyNet[member.id] += net
-          })
-        } else if (tx.type === GroupTransactionType.TRANSFER) {
-          const { paidBy, paidTo } = tx.groupMetadata as GroupTransferMetadata
-          const amount = tx.amount
-
-          // Payer has positive net (they are owed)
-          overallNet[paidBy.id] -= amount
-          if (isCurrentMonth) monthlyNet[paidBy.id] -= amount
-
-          // Receiver has negative net (they owe)
-          overallNet[paidTo.id] += amount
-          if (isCurrentMonth) monthlyNet[paidTo.id] += amount
-        }
-      })
-
-      // Use getSettlement to calculate optimal settlements
-      const monthlySettlements = getSettlement(monthlyNet)
-      const overallSettlements = getSettlement(overallNet)
-
-      // Extract how much the given user owes to each member
-      monthlySettlements.forEach((s) => {
-        if (s.from === user.id) {
-          monthlyOwes[s.to] = (monthlyOwes[s.to] || 0) + s.amount
-        } else if (s.to === user.id) {
-          monthlyOwes[s.from] = (monthlyOwes[s.from] || 0) - s.amount
-        }
-      })
-
-      overallSettlements.forEach((s) => {
-        if (s.from === user.id) {
-          overallOwes[s.to] = (overallOwes[s.to] || 0) + s.amount
-        } else if (s.to === user.id) {
-          overallOwes[s.from] = (overallOwes[s.from] || 0) - s.amount
-        }
-      })
-
-      groupBalances.push({
-        group,
-        monthlyOwes,
-        overallOwes,
-        balance: overallNet[user.id] || 0,
-      })
-    }
-
-    return groupBalances
+    ).map(hydrateGroupBalance)
   },
 
   getMonthlyStats: async (
@@ -163,26 +248,15 @@ export const api = {
     month: number,
     year: number,
   ): Promise<MonthlyStats> => {
-    await delay()
-
-    const monthTxs = mockTransactions.filter((tx) => {
-      return (
-        tx.dateTime.getMonth() === month && tx.dateTime.getFullYear() === year
-      )
-    })
-
-    const { income, expense, owes } = monthTxs.reduce(
-      (acc, tx) => {
-        const { income, expense, owes } = getUserAmounts(user, tx)
-        acc.income += income
-        acc.expense += expense
-        acc.owes += owes
-        return acc
-      },
-      { income: 0, expense: 0, owes: 0 },
+    return hydrateMonthlyStats(
+      await getMonthlyStatsServer({
+        data: {
+          userId: user.id,
+          month,
+          year,
+        },
+      }),
     )
-
-    return { income, expense, owes }
   },
 
   getCategoryStats: async (
@@ -190,86 +264,39 @@ export const api = {
     month: number,
     year: number,
   ): Promise<Array<CategoryStat>> => {
-    await delay()
-
-    const monthTxs = mockTransactions.filter((tx) => {
-      return (
-        tx.dateTime.getMonth() === month && tx.dateTime.getFullYear() === year
-      )
-    })
-
-    const getAmountForCategory = (category: Category) => {
-      return monthTxs
-        .filter((tx) => {
-          if (tx.scope === TransactionScope.PERSONAL) {
-            return tx.metadata.category?.id === category.id
-          }
-          if (tx.scope === TransactionScope.GROUP) {
-            if (tx.type === GroupTransactionType.SPLIT) {
-              const groupMetadata = tx.groupMetadata as GroupSplitMetadata
-              return groupMetadata.category?.id === category.id
-            }
-          }
-        })
-        .reduce((acc, tx) => {
-          const { income, expense, owes: _ } = getUserAmounts(user, tx)
-          acc = income - expense
-          return acc
-        }, 0)
-    }
-
-    const categories = [...mockCategories]
-
-    const allSubCategoryIds = new Set(
-      categories.flatMap((c) => c.subCategories),
-    )
-
-    const categoryStats: Array<CategoryStat> = categories.map((cat) => {
-      const getStat = (c: Category): CategoryStat => ({
-        category: c,
-        amount: getAmountForCategory(c),
-        isSubcategory: allSubCategoryIds.has(c.id),
-        subcategories: [],
+    return (
+      await getCategoryStatsServer({
+        data: {
+          userId: user.id,
+          month,
+          year,
+        },
       })
-
-      const subStats = cat.subCategories.map((subId) => {
-        const subCat = categories.find((c) => c.id === subId)
-        return getStat(subCat!)
-      })
-
-      const subCatSum = subStats.reduce((acc, s) => acc + s.amount, 0)
-
-      return {
-        ...getStat(cat),
-        amount: getAmountForCategory(cat) + subCatSum,
-        subcategories: subStats,
-      }
-    })
-
-    return categoryStats.filter((c) => c.amount !== 0)
+    ).map(hydrateCategoryStat)
   },
 
   getPeopleBalances: async (user: User): Promise<Array<PeopleBalance>> => {
-    const now = new Date()
-    const groupBalances = await api.getGroupBalances(
-      user,
-      now.getMonth(),
-      now.getFullYear(),
-    )
-
-    const peopleMap: Record<string, number> = {}
-
-    groupBalances.forEach((gb) => {
-      Object.entries(gb.overallOwes).forEach(([userId, owes]) => {
-        peopleMap[userId] = (peopleMap[userId] || 0) + owes
+    return (
+      await getPeopleBalancesServer({
+        data: {
+          userId: user.id,
+        },
       })
-    })
+    ).map(hydratePeopleBalance)
+  },
 
-    return Object.entries(peopleMap)
-      .map(([userId, owes]) => ({
-        user: mockUsers.find((u) => u.id === userId)!,
-        owes,
-      }))
-      .filter((p) => p.owes !== 0)
+  getDatabaseTables: async () => {
+    return (await getDatabaseTablesServer()).map(hydrateDatabaseTable)
+  },
+
+  getDatabaseTablePreview: async (tableName: string, limit = 25) => {
+    return hydrateDatabaseTablePreview(
+      await getDatabaseTablePreviewServer({
+        data: {
+          tableName,
+          limit,
+        },
+      }),
+    )
   },
 }

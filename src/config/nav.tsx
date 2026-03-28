@@ -1,5 +1,6 @@
 import {
   Calculator,
+  Database,
   Grid2X2Plus,
   LayoutDashboard,
   LineChart,
@@ -12,6 +13,7 @@ export const navItems = [
   { label: 'Groups', href: '/groups', icon: Users },
   { label: 'Categories', href: '/categories', icon: Grid2X2Plus },
   { label: 'Accounts', href: '/accounts', icon: PiggyBank },
+  { label: 'Database', href: '/database', icon: Database },
   { label: 'Budget', href: '/budget', icon: Calculator },
   { label: 'Charts', href: '/charts', icon: LineChart },
 ]

@@ -1,7 +1,6 @@
 import { getActiveFormContext } from '@/components/layout/layout-route'
 import type { NavItem } from '@/components/layout/app-layout'
 import { MainLogo } from '@/components/layout/header'
-import { ModeToggle } from '@/components/mode-toggle'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import {
@@ -14,10 +13,12 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { NavLink } from '@/components/ui/nav-link'
 import { Separator } from '@/components/ui/separator'
+import { useDatabaseTables } from '@/features/database/api'
+import { authClient } from '@/lib/auth-client'
 import { useCurrentUser } from '@/features/users/api'
 import type { User } from '@/features/users/types'
 import { Link, useLocation } from '@tanstack/react-router'
-import { CircleUser, LogOut, Settings } from 'lucide-react'
+import { CircleUser, Database, LogOut, Settings } from 'lucide-react'
 import { Suspense } from 'react'
 
 export interface SidebarProps {
@@ -25,6 +26,10 @@ export interface SidebarProps {
 }
 
 function ProfileSection({ currentUser }: { currentUser: User }) {
+  const handleSignOut = async () => {
+    await authClient.signOut()
+  }
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -56,13 +61,68 @@ function ProfileSection({ currentUser }: { currentUser: User }) {
             <Settings className="h-4 w-4" /> Settings
           </DropdownMenuItem>
         </Link>
-        <ModeToggle />
         <DropdownMenuSeparator />
-        <DropdownMenuItem className="text-destructive focus:text-destructive">
+        <DropdownMenuItem
+          className="text-destructive focus:text-destructive"
+          onClick={handleSignOut}
+        >
           <LogOut className="h-4 w-4" /> Log out
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
+  )
+}
+
+function DatabaseSidebarSection({
+  pathname,
+  searchStr,
+}: {
+  pathname: string
+  searchStr: string
+}) {
+  const isDatabaseRoute = pathname === '/database'
+  const { data: tables = [] } = useDatabaseTables(isDatabaseRoute)
+
+  if (!isDatabaseRoute || tables.length === 0) {
+    return null
+  }
+
+  const activeTableName = new URLSearchParams(searchStr).get('table') ?? tables[0]?.name
+
+  return (
+    <div className="flex min-h-0 flex-col gap-3">
+      <Separator />
+      <div className="flex items-center gap-2 px-2">
+        <Database className="text-primary h-4 w-4" />
+        <h2 className="text-sm font-semibold">Tables</h2>
+      </div>
+      <div className="flex min-h-0 flex-col gap-1 overflow-y-auto pr-1">
+        {tables.map((table) => {
+          const isActive = table.name === activeTableName
+
+          return (
+            <Link
+              key={table.name}
+              to="/database"
+              search={{ table: table.name }}
+              className={
+                isActive
+                  ? 'bg-primary/10 text-primary flex flex-col gap-1 rounded-lg px-3 py-2'
+                  : 'text-muted-foreground hover:bg-sidebar-accent hover:text-foreground flex flex-col gap-1 rounded-lg px-3 py-2 transition-colors'
+              }
+            >
+              <div className="flex items-center justify-between gap-2">
+                <span className="truncate text-sm font-medium">{table.name}</span>
+                <span className="text-xs">{table.rowCount}</span>
+              </div>
+              <span className="text-xs opacity-80">
+                {table.columns.length} columns
+              </span>
+            </Link>
+          )
+        })}
+      </div>
+    </div>
   )
 }
 
@@ -96,6 +156,11 @@ export function Sidebar({ navItems }: SidebarProps) {
           </div>
         ))}
       </nav>
+
+      <DatabaseSidebarSection
+        pathname={location.pathname}
+        searchStr={location.searchStr}
+      />
 
       <Separator />
 

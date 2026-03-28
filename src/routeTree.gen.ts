@@ -10,8 +10,10 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as TransactionsRouteImport } from './routes/transactions'
+import { Route as SignInRouteImport } from './routes/sign-in'
 import { Route as MoreRouteImport } from './routes/more'
 import { Route as GroupsRouteImport } from './routes/groups'
+import { Route as DatabaseRouteImport } from './routes/database'
 import { Route as ChartsRouteImport } from './routes/charts'
 import { Route as CategoriesRouteImport } from './routes/categories'
 import { Route as BudgetRouteImport } from './routes/budget'
@@ -22,10 +24,16 @@ import { Route as GroupsFormRouteImport } from './routes/groups/form'
 import { Route as ChaptersFormRouteImport } from './routes/chapters/form'
 import { Route as CategoriesFormRouteImport } from './routes/categories/form'
 import { Route as AccountsFormRouteImport } from './routes/accounts/form'
+import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 
 const TransactionsRoute = TransactionsRouteImport.update({
   id: '/transactions',
   path: '/transactions',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SignInRoute = SignInRouteImport.update({
+  id: '/sign-in',
+  path: '/sign-in',
   getParentRoute: () => rootRouteImport,
 } as any)
 const MoreRoute = MoreRouteImport.update({
@@ -36,6 +44,11 @@ const MoreRoute = MoreRouteImport.update({
 const GroupsRoute = GroupsRouteImport.update({
   id: '/groups',
   path: '/groups',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DatabaseRoute = DatabaseRouteImport.update({
+  id: '/database',
+  path: '/database',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ChartsRoute = ChartsRouteImport.update({
@@ -88,6 +101,11 @@ const AccountsFormRoute = AccountsFormRouteImport.update({
   path: '/form',
   getParentRoute: () => AccountsRoute,
 } as any)
+const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
+  id: '/api/auth/$',
+  path: '/api/auth/$',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -95,14 +113,17 @@ export interface FileRoutesByFullPath {
   '/budget': typeof BudgetRoute
   '/categories': typeof CategoriesRouteWithChildren
   '/charts': typeof ChartsRoute
+  '/database': typeof DatabaseRoute
   '/groups': typeof GroupsRouteWithChildren
   '/more': typeof MoreRoute
+  '/sign-in': typeof SignInRoute
   '/transactions': typeof TransactionsRouteWithChildren
   '/accounts/form': typeof AccountsFormRoute
   '/categories/form': typeof CategoriesFormRoute
   '/chapters/form': typeof ChaptersFormRoute
   '/groups/form': typeof GroupsFormRoute
   '/transactions/form': typeof TransactionsFormRoute
+  '/api/auth/$': typeof ApiAuthSplatRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -110,14 +131,17 @@ export interface FileRoutesByTo {
   '/budget': typeof BudgetRoute
   '/categories': typeof CategoriesRouteWithChildren
   '/charts': typeof ChartsRoute
+  '/database': typeof DatabaseRoute
   '/groups': typeof GroupsRouteWithChildren
   '/more': typeof MoreRoute
+  '/sign-in': typeof SignInRoute
   '/transactions': typeof TransactionsRouteWithChildren
   '/accounts/form': typeof AccountsFormRoute
   '/categories/form': typeof CategoriesFormRoute
   '/chapters/form': typeof ChaptersFormRoute
   '/groups/form': typeof GroupsFormRoute
   '/transactions/form': typeof TransactionsFormRoute
+  '/api/auth/$': typeof ApiAuthSplatRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -126,14 +150,17 @@ export interface FileRoutesById {
   '/budget': typeof BudgetRoute
   '/categories': typeof CategoriesRouteWithChildren
   '/charts': typeof ChartsRoute
+  '/database': typeof DatabaseRoute
   '/groups': typeof GroupsRouteWithChildren
   '/more': typeof MoreRoute
+  '/sign-in': typeof SignInRoute
   '/transactions': typeof TransactionsRouteWithChildren
   '/accounts/form': typeof AccountsFormRoute
   '/categories/form': typeof CategoriesFormRoute
   '/chapters/form': typeof ChaptersFormRoute
   '/groups/form': typeof GroupsFormRoute
   '/transactions/form': typeof TransactionsFormRoute
+  '/api/auth/$': typeof ApiAuthSplatRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -143,14 +170,17 @@ export interface FileRouteTypes {
     | '/budget'
     | '/categories'
     | '/charts'
+    | '/database'
     | '/groups'
     | '/more'
+    | '/sign-in'
     | '/transactions'
     | '/accounts/form'
     | '/categories/form'
     | '/chapters/form'
     | '/groups/form'
     | '/transactions/form'
+    | '/api/auth/$'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -158,14 +188,17 @@ export interface FileRouteTypes {
     | '/budget'
     | '/categories'
     | '/charts'
+    | '/database'
     | '/groups'
     | '/more'
+    | '/sign-in'
     | '/transactions'
     | '/accounts/form'
     | '/categories/form'
     | '/chapters/form'
     | '/groups/form'
     | '/transactions/form'
+    | '/api/auth/$'
   id:
     | '__root__'
     | '/'
@@ -173,14 +206,17 @@ export interface FileRouteTypes {
     | '/budget'
     | '/categories'
     | '/charts'
+    | '/database'
     | '/groups'
     | '/more'
+    | '/sign-in'
     | '/transactions'
     | '/accounts/form'
     | '/categories/form'
     | '/chapters/form'
     | '/groups/form'
     | '/transactions/form'
+    | '/api/auth/$'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -189,10 +225,13 @@ export interface RootRouteChildren {
   BudgetRoute: typeof BudgetRoute
   CategoriesRoute: typeof CategoriesRouteWithChildren
   ChartsRoute: typeof ChartsRoute
+  DatabaseRoute: typeof DatabaseRoute
   GroupsRoute: typeof GroupsRouteWithChildren
   MoreRoute: typeof MoreRoute
+  SignInRoute: typeof SignInRoute
   TransactionsRoute: typeof TransactionsRouteWithChildren
   ChaptersFormRoute: typeof ChaptersFormRoute
+  ApiAuthSplatRoute: typeof ApiAuthSplatRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -202,6 +241,13 @@ declare module '@tanstack/react-router' {
       path: '/transactions'
       fullPath: '/transactions'
       preLoaderRoute: typeof TransactionsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sign-in': {
+      id: '/sign-in'
+      path: '/sign-in'
+      fullPath: '/sign-in'
+      preLoaderRoute: typeof SignInRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/more': {
@@ -216,6 +262,13 @@ declare module '@tanstack/react-router' {
       path: '/groups'
       fullPath: '/groups'
       preLoaderRoute: typeof GroupsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/database': {
+      id: '/database'
+      path: '/database'
+      fullPath: '/database'
+      preLoaderRoute: typeof DatabaseRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/charts': {
@@ -288,6 +341,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AccountsFormRouteImport
       parentRoute: typeof AccountsRoute
     }
+    '/api/auth/$': {
+      id: '/api/auth/$'
+      path: '/api/auth/$'
+      fullPath: '/api/auth/$'
+      preLoaderRoute: typeof ApiAuthSplatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -344,10 +404,13 @@ const rootRouteChildren: RootRouteChildren = {
   BudgetRoute: BudgetRoute,
   CategoriesRoute: CategoriesRouteWithChildren,
   ChartsRoute: ChartsRoute,
+  DatabaseRoute: DatabaseRoute,
   GroupsRoute: GroupsRouteWithChildren,
   MoreRoute: MoreRoute,
+  SignInRoute: SignInRoute,
   TransactionsRoute: TransactionsRouteWithChildren,
   ChaptersFormRoute: ChaptersFormRoute,
+  ApiAuthSplatRoute: ApiAuthSplatRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

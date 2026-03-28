@@ -8,7 +8,7 @@ export const Route = createFileRoute('/more')({
 })
 
 function MorePage() {
-  const moreItems = navItems.slice(4)
+  const moreItems = navItems.slice(5)
 
   return (
     <AppLayout>

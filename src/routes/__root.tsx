@@ -1,3 +1,4 @@
+import { getAuthState } from '../../backend/auth-session'
 import { TanStackDevtools } from '@tanstack/react-devtools'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import {
@@ -5,6 +6,7 @@ import {
   Outlet,
   Scripts,
   createRootRoute,
+  redirect,
 } from '@tanstack/react-router'
 import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools'
 import { themeScript } from '@/lib/theme-script'
@@ -15,6 +17,29 @@ import appCss from '@/styles.css?url'
 const queryClient = new QueryClient()
 
 export const Route = createRootRoute({
+  beforeLoad: async ({ location }) => {
+    if (location.pathname.startsWith('/api/auth')) {
+      return
+    }
+
+    const authState = await getAuthState()
+    const redirectPath = `${location.pathname}${location.search}${location.hash}`
+
+    if (!authState.session && location.pathname !== '/sign-in') {
+      throw redirect({
+        to: '/sign-in',
+        search: {
+          redirect: redirectPath,
+        },
+      })
+    }
+
+    if (authState.session && location.pathname === '/sign-in') {
+      throw redirect({
+        to: '/',
+      })
+    }
+  },
   head: () => ({
     meta: [
       {
@@ -43,7 +68,7 @@ export const Route = createRootRoute({
 function RootComponent() {
   return (
     <QueryClientProvider client={queryClient}>
-      <ThemeProvider defaultTheme="system" storageKey="vite-ui-theme">
+      <ThemeProvider>
         <Outlet />
         <TanStackDevtools
           config={{
