@@ -22,6 +22,7 @@ import { Category } from '@/features/categories/types'
 import { useChapters } from '@/features/chapters/api'
 import { PersonalTransactionType } from '@/features/transactions/types'
 import { cn } from '@/lib/utils'
+import { useNavigate } from '@tanstack/react-router'
 import {
   ArrowRightLeft,
   CheckIcon,
@@ -77,6 +78,7 @@ const PTX_TYPE_OPTIONS: {
 // #endregion
 
 export function PersonTxFormSection() {
+  const navigate = useNavigate()
   const [personalTxType, setPersonalTxType] = useState<PersonalTransactionType>(
     PersonalTransactionType.EXPENSE,
   )
@@ -104,9 +106,13 @@ export function PersonTxFormSection() {
 
   const currencySymbol = CURRENCY_META[formData.currency].symbol
   const isTransfer = personalTxType === PersonalTransactionType.TRANSFER
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    navigate({ to: '/transactions' })
+  }
 
   return (
-    <>
+    <form onSubmit={handleSubmit} className="flex flex-col gap-8 md:gap-10">
       <FormSection heading="Details">
         <div className="flex flex-col gap-4">
           <FieldRow label="Type">
@@ -155,7 +161,28 @@ export function PersonTxFormSection() {
           updateMetadata={updateMetadata}
         />
       )}
-    </>
+
+      <FormSection>
+        <div className="flex flex-col justify-center gap-3 sm:flex-row">
+          <Button
+            type="submit"
+            size="lg"
+            className="w-full font-semibold shadow-sm sm:w-auto sm:min-w-48"
+          >
+            Save
+          </Button>
+          <Button
+            type="button"
+            variant="outline"
+            size="lg"
+            className="w-full sm:w-auto sm:min-w-32"
+            onClick={() => navigate({ to: '/transactions' })}
+          >
+            Cancel
+          </Button>
+        </div>
+      </FormSection>
+    </form>
   )
 }
 

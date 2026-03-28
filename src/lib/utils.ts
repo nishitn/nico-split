@@ -130,3 +130,31 @@ export function getSettlement(net: Record<string, number>) {
 
   return settlement
 }
+
+export function getPaidByText(
+  user: User,
+  paidBy: Record<string, number>,
+  members: Array<User>,
+) {
+  let paidByText: string
+  const paidByLen = Object.keys(paidBy).length
+
+  if (paidByLen === 0) {
+    throw new Error('No paidBy found')
+  } else if (paidByLen === 1) {
+    if (paidBy[user.id] !== undefined) {
+      paidByText = 'You'
+    } else {
+      const payeeId = Object.keys(paidBy)[0]
+      paidByText = members.find((m) => m.id === payeeId)?.name || 'Unknown'
+    }
+  } else {
+    if (paidBy[user.id] !== undefined) {
+      paidByText = `You + ${paidByLen - 1} others`
+    } else {
+      paidByText = 'Multiple People'
+    }
+  }
+
+  return paidByText
+}

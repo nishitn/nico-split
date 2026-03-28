@@ -49,6 +49,11 @@ export enum GroupTransactionType {
   TRANSFER = 'transfer',
 }
 
+export enum SplitType {
+  EQUAL = 'equal',
+  UNEQUAL = 'unequal',
+}
+
 export interface GroupSplitMetadata {
   paidBy: Record<string, number> // UUID as string to amount
   split: Record<string, number> // UUID as string to amount

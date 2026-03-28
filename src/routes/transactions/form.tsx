@@ -1,8 +1,10 @@
 import { AppLayout } from '@/components/layout/app-layout'
 import { FormSection } from '@/components/layout/form-section'
 import { FormNavButton } from '@/components/ui/form-nav-button'
+import { GroupSplitTxFormSection } from '@/features/transactions/components/group-split-tx-form'
+import { GroupTransferTxFormSection } from '@/features/transactions/components/group-transfer-tx-form'
 import { PersonTxFormSection } from '@/features/transactions/components/personal-tx-form'
-import { createFileRoute, useNavigate } from '@tanstack/react-router'
+import { createFileRoute } from '@tanstack/react-router'
 import { ArrowRightLeft, LucideIcon, UserIcon, UsersIcon } from 'lucide-react'
 import { useState } from 'react'
 import { z } from 'zod'
@@ -45,12 +47,11 @@ const TX_TYPE_OPTIONS: {
     icon: ArrowRightLeft,
   },
 ]
-0
+
 // #endregion
 
 function TransactionFormPage() {
   const search = Route.useSearch()
-  const navigate = useNavigate({ from: Route.fullPath })
   const isEditing = !!search.id
 
   const [txType, setTxType] = useState<TxTypeHeading>('personal')
@@ -60,6 +61,8 @@ function TransactionFormPage() {
       <form className="flex flex-col gap-4 md:gap-8">
         <TxTypeNavSection txType={txType} setTxType={setTxType} />
         {txType === 'personal' && <PersonTxFormSection />}
+        {txType === 'split' && <GroupSplitTxFormSection />}
+        {txType === 'user_transfer' && <GroupTransferTxFormSection />}
       </form>
     </AppLayout>
   )

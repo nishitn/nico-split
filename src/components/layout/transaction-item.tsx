@@ -24,7 +24,13 @@ import {
   TransactionScope,
 } from '@/features/transactions/types'
 import type { User } from '@/features/users/types'
-import { cn, getOwesColor, getOwesText, getUserOwes } from '@/lib/utils'
+import {
+  cn,
+  getOwesColor,
+  getOwesText,
+  getPaidByText,
+  getUserOwes,
+} from '@/lib/utils'
 import type { LucideIcon } from 'lucide-react'
 import { FileQuestion, MoveRight, Users } from 'lucide-react'
 import type { ReactNode } from 'react'
@@ -226,34 +232,6 @@ export function GroupSplitTransactionItem({
       </NsContent>
     </NsCard>
   )
-}
-
-function getPaidByText(
-  user: User,
-  paidBy: Record<string, number>,
-  members: Array<User>,
-) {
-  let paidByText: string
-  const paidByLen = Object.keys(paidBy).length
-
-  if (paidByLen === 0) {
-    throw new Error('No paidBy found')
-  } else if (paidByLen === 1) {
-    if (paidBy[user.id]) {
-      paidByText = 'You'
-    } else {
-      const payeeId = Object.keys(paidBy)[0]
-      paidByText = members.find((m) => m.id === payeeId)?.name || 'Unknown'
-    }
-  } else {
-    if (paidBy[user.id]) {
-      paidByText = `You + ${paidByLen - 1} others`
-    } else {
-      paidByText = 'Multiple People'
-    }
-  }
-
-  return paidByText
 }
 
 export function GroupTransferTransactionItem({

@@ -29,6 +29,11 @@ const delay = (ms: number = DELAY) =>
   new Promise((resolve) => setTimeout(resolve, ms))
 
 export const api = {
+  getUsers: async (): Promise<Array<User>> => {
+    await delay()
+    return [...mockUsers]
+  },
+
   getCurrentUser: async (): Promise<User> => {
     await delay()
     return mockUsers[0]
