@@ -1,10 +1,10 @@
-import type { UUID } from 'crypto'
+import { CategoryType } from '../../../backend/enums'
+import type { CategoryTypeValue } from '../../../backend/enums'
+import type { UUID } from 'node:crypto'
 import type { LucideIcon } from 'lucide-react'
 
-export enum CategoryType {
-  INCOME = 'income',
-  EXPENSE = 'expense',
-}
+export { CategoryType }
+export type CategoryType = CategoryTypeValue
 
 export interface Category {
   id: UUID

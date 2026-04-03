@@ -2,19 +2,6 @@ import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import * as React from 'react'
 import { z } from 'zod'
 
-import { AppLayout } from '@/components/layout/app-layout'
-import { FormSection } from '@/components/layout/form-section'
-import { Button } from '@/components/ui/button'
-import { FormNavButton } from '@/components/ui/form-nav-button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@/components/ui/popover'
-import { CategoryType } from '@/features/categories/types'
-import { cn } from '@/lib/utils'
 import {
   Briefcase,
   Car,
@@ -29,7 +16,6 @@ import {
   HeartPulse,
   Home,
   Landmark,
-  LucideIcon,
   PiggyBank,
   Plane,
   Receipt,
@@ -42,6 +28,21 @@ import {
   Wallet,
   Wrench,
 } from 'lucide-react'
+import type {
+  LucideIcon} from 'lucide-react';
+import { AppLayout } from '@/components/layout/app-layout'
+import { FormSection } from '@/components/layout/form-section'
+import { Button } from '@/components/ui/button'
+import { FormNavButton } from '@/components/ui/form-nav-button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover'
+import { CategoryType } from '@/features/categories/types'
+import { cn } from '@/lib/utils'
 
 const searchSchema = z.object({
   id: z.string().optional(),
@@ -56,10 +57,10 @@ interface CategoryIconOption {
   value: string
   label: string
   icon: LucideIcon
-  keywords: string[]
+  keywords: Array<string>
 }
 
-const CATEGORY_ICON_OPTIONS: CategoryIconOption[] = [
+const CATEGORY_ICON_OPTIONS: Array<CategoryIconOption> = [
   {
     value: 'utensils',
     label: 'Food',

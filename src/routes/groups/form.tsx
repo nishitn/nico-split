@@ -1,3 +1,19 @@
+import { createFileRoute, useNavigate } from '@tanstack/react-router'
+import {
+  Briefcase,
+  Building2,
+  CheckIcon,
+  ChevronDownIcon,
+  HeartHandshake,
+  Home,
+  
+  Plane,
+  SearchIcon,
+  Users
+} from 'lucide-react'
+import * as React from 'react'
+import { z } from 'zod'
+import type {LucideIcon} from 'lucide-react';
 import { AppLayout } from '@/components/layout/app-layout'
 import { FormSection } from '@/components/layout/form-section'
 import { Button } from '@/components/ui/button'
@@ -9,23 +25,9 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover'
-import { useCurrentUser, useUsers } from '@/features/users/api'
+import type { User } from '@/features/users/types'
+import { useCurrentUser, useFriends } from '@/features/users/api'
 import { cn } from '@/lib/utils'
-import { createFileRoute, useNavigate } from '@tanstack/react-router'
-import {
-  Briefcase,
-  Building2,
-  CheckIcon,
-  ChevronDownIcon,
-  HeartHandshake,
-  Home,
-  Plane,
-  SearchIcon,
-  Users,
-  type LucideIcon,
-} from 'lucide-react'
-import * as React from 'react'
-import { z } from 'zod'
 
 const searchSchema = z.object({
   id: z.string().optional(),
@@ -40,10 +42,10 @@ interface GroupIconOption {
   value: string
   label: string
   icon: LucideIcon
-  keywords: string[]
+  keywords: Array<string>
 }
 
-const GROUP_ICON_OPTIONS: GroupIconOption[] = [
+const GROUP_ICON_OPTIONS: Array<GroupIconOption> = [
   {
     value: 'users',
     label: 'People',
@@ -126,11 +128,11 @@ function GroupFormPage() {
   const navigate = useNavigate({ from: Route.fullPath })
   const isEditing = !!search.id
   const { data: currentUser } = useCurrentUser()
-  const { data: users = [] } = useUsers()
+  const { data: friends = [] } = useFriends()
 
   const [groupName, setGroupName] = React.useState('')
   const [iconName, setIconName] = React.useState('users')
-  const [memberIds, setMemberIds] = React.useState<string[]>([])
+  const [memberIds, setMemberIds] = React.useState<Array<string>>([])
   const [peopleQuery, setPeopleQuery] = React.useState('')
   const [peopleOpen, setPeopleOpen] = React.useState(false)
 
@@ -141,22 +143,28 @@ function GroupFormPage() {
   const selectedGroupIcon =
     GROUP_ICON_OPTIONS.find((option) => option.value === iconName) ??
     GROUP_ICON_OPTIONS[0]
-  const selectedUsers = users.filter((user) => memberIds.includes(user.id))
-  const filteredUsers = users.filter((user) => {
+  const selectablePeople = React.useMemo(() => {
+    const deduped = new Map<string, User>()
+    deduped.set(currentUser.id, currentUser)
+    friends.forEach((friend) => deduped.set(friend.id, friend))
+    return Array.from(deduped.values())
+  }, [currentUser, friends])
+
+  const selectedUsers = selectablePeople.filter((user) => memberIds.includes(user.id))
+  const filteredUsers = selectablePeople.filter((user) => {
     const normalizedQuery = peopleQuery.trim().toLowerCase()
     if (!normalizedQuery) return true
 
-    const searchableName =
-      user.id === currentUser?.id ? `${user.name} you` : user.name
+    const searchableName = user.id === currentUser.id ? `${user.name} you` : user.name
 
     return searchableName.toLowerCase().includes(normalizedQuery)
   })
 
   React.useEffect(() => {
-    if (currentUser && memberIds.length === 0) {
+    if (memberIds.length === 0) {
       setMemberIds([currentUser.id])
     }
-  }, [currentUser, memberIds.length])
+  }, [currentUser.id, memberIds.length])
 
   const toggleMember = (userId: string) => {
     setMemberIds((prev) =>
@@ -267,7 +275,7 @@ function GroupFormPage() {
                               >
                                 <div className="min-w-0 flex-1">
                                   <p className="truncate text-sm font-medium">
-                                    {user.id === currentUser?.id
+                                    {user.id === currentUser.id
                                       ? `${user.name} (You)`
                                       : user.name}
                                   </p>
@@ -298,7 +306,7 @@ function GroupFormPage() {
                         className="bg-primary/10 text-primary inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-sm font-medium"
                       >
                         <span className="truncate">
-                          {user.id === currentUser?.id ? `${user.name} (You)` : user.name}
+                          {user.id === currentUser.id ? `${user.name} (You)` : user.name}
                         </span>
                         <span className="text-primary/70 text-xs">x</span>
                       </button>

@@ -25,8 +25,6 @@ export function MonthYearPicker({
 }: MonthYearPickerProps) {
   const [isOpen, setIsOpen] = React.useState(false)
 
-  const currentDate = new Date(year, month)
-
   const handlePreviousMonth = () => {
     if (month === 0) {
       onChange(11, year - 1)
@@ -73,10 +71,7 @@ export function MonthYearPicker({
         <PopoverTrigger asChild>
           <Button
             variant="outline"
-            className={cn(
-              'w-[180px] justify-start text-left font-normal',
-              !currentDate && 'text-muted-foreground',
-            )}
+            className={cn('w-[180px] justify-start text-left font-normal')}
           >
             <CalendarIcon className="mr-2 h-4 w-4" />
             {monthNames[month]} {year}

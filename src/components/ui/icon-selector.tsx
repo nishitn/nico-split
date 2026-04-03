@@ -16,7 +16,7 @@ export function IconSelector({
 }: {
   value: string
   onChange: (value: string) => void
-  options: IconOption[]
+  options: Array<IconOption>
   columns?: 3 | 4
 }) {
   return (

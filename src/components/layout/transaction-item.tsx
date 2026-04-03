@@ -1,13 +1,4 @@
-import { CurrencySpan } from '@/components/ui/currency-span'
-import {
-  NsAmount,
-  NsCard,
-  NsContent,
-  NsIcon,
-  NsMainRow,
-  NsSubRow,
-} from '@/components/ui/ns-card'
-import { Separator } from '@/components/ui/separator'
+import { FileQuestion, MoveRight, Users } from 'lucide-react'
 import type { Account } from '@/features/accounts/types'
 import type { Category } from '@/features/categories/types'
 import type { Group } from '@/features/groups/types'
@@ -18,12 +9,9 @@ import type {
   PersonalTransaction,
   Transaction,
 } from '@/features/transactions/types'
-import {
-  GroupTransactionType,
-  PersonalTransactionType,
-  TransactionScope,
-} from '@/features/transactions/types'
 import type { User } from '@/features/users/types'
+import type { LucideIcon } from 'lucide-react'
+import type { ReactNode } from 'react'
 import {
   cn,
   getOwesColor,
@@ -31,25 +19,52 @@ import {
   getPaidByText,
   getUserOwes,
 } from '@/lib/utils'
-import type { LucideIcon } from 'lucide-react'
-import { FileQuestion, MoveRight, Users } from 'lucide-react'
-import type { ReactNode } from 'react'
+import {
+  GroupTransactionType,
+  PersonalTransactionType,
+  TransactionScope,
+} from '@/features/transactions/types'
+import { Separator } from '@/components/ui/separator'
+import {
+  NsAmount,
+  NsCard,
+  NsContent,
+  NsIcon,
+  NsMainRow,
+  NsSubRow,
+} from '@/components/ui/ns-card'
+import { CurrencySpan } from '@/components/ui/currency-span'
 
 interface TransactionItemProps {
   tx: Transaction
   user: User
 }
 
+function isPersonalTransaction(
+  transaction: Transaction,
+): transaction is PersonalTransaction {
+  return transaction.scope === TransactionScope.PERSONAL
+}
+
+function isGroupSplitTransaction(
+  transaction: Transaction,
+): transaction is GroupTransaction {
+  return (
+    transaction.scope === TransactionScope.GROUP &&
+    transaction.type === GroupTransactionType.SPLIT
+  )
+}
+
 export function TransactionItem({ tx, user }: TransactionItemProps) {
-  if (tx.scope === TransactionScope.PERSONAL) {
+  if (isPersonalTransaction(tx)) {
     return <PersonalTransactionItem tx={tx} />
-  } else if (tx.scope === TransactionScope.GROUP) {
-    if (tx.type === GroupTransactionType.SPLIT) {
-      return <GroupSplitTransactionItem tx={tx} user={user} />
-    } else if (tx.type === GroupTransactionType.TRANSFER) {
-      return <GroupTransferTransactionItem tx={tx} user={user} />
-    }
   }
+
+  if (isGroupSplitTransaction(tx)) {
+    return <GroupSplitTransactionItem tx={tx} user={user} />
+  }
+
+  return <GroupTransferTransactionItem tx={tx} user={user} />
 }
 
 export function PersonalTransactionItem({ tx }: { tx: PersonalTransaction }) {

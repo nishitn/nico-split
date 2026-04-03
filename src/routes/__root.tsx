@@ -1,4 +1,3 @@
-import { getAuthState } from '../../backend/auth-session'
 import { TanStackDevtools } from '@tanstack/react-devtools'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import {
@@ -9,6 +8,7 @@ import {
   redirect,
 } from '@tanstack/react-router'
 import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools'
+import { getAuthState } from '../../backend/auth-session'
 import { themeScript } from '@/lib/theme-script'
 import { ThemeProvider } from '@/components/theme-provider'
 
@@ -23,7 +23,7 @@ export const Route = createRootRoute({
     }
 
     const authState = await getAuthState()
-    const redirectPath = `${location.pathname}${location.search}${location.hash}`
+    const redirectPath = `${location.pathname}${location.searchStr}${location.hash}`
 
     if (!authState.session && location.pathname !== '/sign-in') {
       throw redirect({

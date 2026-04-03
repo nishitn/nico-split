@@ -1,3 +1,10 @@
+import { useNavigate } from '@tanstack/react-router'
+import { ChevronDownIcon, SparklesIcon, TriangleAlertIcon } from 'lucide-react'
+import { useEffect, useState } from 'react'
+import { SplitType } from '../types'
+import type { User } from '@/features/users/types'
+import type {GroupPeopleMetadata} from '@/features/transactions/components/group-tx-form';
+import type {RequiredFormData} from '@/features/transactions/components/common-tx-input';
 import { FormSection } from '@/components/layout/form-section'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
@@ -22,26 +29,21 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { Currency, CURRENCY_META } from '@/features/accounts/types'
+import { CURRENCY_META, Currency } from '@/features/accounts/types'
 import { useCategories } from '@/features/categories/api'
 import { CategoryType } from '@/features/categories/types'
 import {
   AmountInput,
   DateInput,
-  TimeInput,
-  type RequiredFormData,
+  
+  TimeInput
 } from '@/features/transactions/components/common-tx-input'
 import {
-  GroupPeopleInput,
-  type GroupPeopleMetadata,
+  GroupPeopleInput
+  
 } from '@/features/transactions/components/group-tx-form'
 import { useCurrentUser } from '@/features/users/api'
-import type { User } from '@/features/users/types'
 import { cn, getPaidByText } from '@/lib/utils'
-import { useNavigate } from '@tanstack/react-router'
-import { ChevronDownIcon, SparklesIcon, TriangleAlertIcon } from 'lucide-react'
-import { useEffect, useMemo, useState } from 'react'
-import { SplitType } from '../types'
 
 type AmountMap = Record<string, number>
 type SplitEntry = { amount: string; included: boolean }
@@ -98,50 +100,8 @@ export function GroupSplitTxFormSection() {
     })
   }, [currentUser.id, formData.amount, metadata.members])
 
-  const splitPreview = useMemo(() => {
-    if (splitType === SplitType.UNEQUAL) {
-      const included = metadata.members.filter(
-        (person) => splitDistribution[person.id]?.included ?? true,
-      )
-      const assigned = included.reduce((sum, person) => {
-        return (
-          sum + (parseFloat(splitDistribution[person.id]?.amount || '0') || 0)
-        )
-      }, 0)
-
-      return {
-        label: `${included.length} participant${included.length === 1 ? '' : 's'}`,
-        detail:
-          totalAmount > 0
-            ? `${currencySymbol}${assigned.toFixed(2)} assigned`
-            : 'Enter amounts to split',
-      }
-    }
-
-    const includedCount = metadata.members.length
-    const perPerson = includedCount > 0 ? totalAmount / includedCount : 0
-    return {
-      label: `${includedCount} participant${includedCount === 1 ? '' : 's'}`,
-      detail:
-        includedCount > 0
-          ? `${currencySymbol}${perPerson.toFixed(2)} each`
-          : 'Pick people to split between',
-    }
-  }, [
-    currencySymbol,
-    metadata.members,
-    splitType,
-    totalAmount,
-    splitDistribution,
-  ])
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    navigate({ to: '/transactions' })
-  }
-
   const applySplitSuggestion = (
-    targetPeople: User[],
+    targetPeople: Array<User>,
     options?: { excludeCurrentUser?: boolean; roundToWhole?: boolean },
   ) => {
     const eligiblePeople = targetPeople.filter((person) =>
@@ -176,7 +136,7 @@ export function GroupSplitTxFormSection() {
         }
       })
 
-      if (options?.excludeCurrentUser && next[currentUser.id]) {
+      if (options?.excludeCurrentUser) {
         next[currentUser.id] = {
           ...next[currentUser.id],
           included: false,
@@ -359,7 +319,7 @@ function PaidByPanel({
   const togglePerson = (personId: string) => {
     const nextPaidBy = { ...paidBy }
 
-    if (nextPaidBy[personId] !== undefined) {
+    if (Object.hasOwn(nextPaidBy, personId)) {
       delete nextPaidBy[personId]
     } else {
       nextPaidBy[personId] =
@@ -513,7 +473,7 @@ function PaidByEditorDialog({
   hasMismatch,
   mismatchAmount,
 }: {
-  people: User[]
+  people: Array<User>
   currentUser: User
   paidBy: AmountMap
   totalAmount: string
@@ -561,7 +521,7 @@ function PaidByEditorDialog({
         </PopoverHeader>
         <div className="mt-4 divide-y overflow-hidden rounded-b-md border-t">
           {people.map((person) => {
-            const included = paidBy[person.id] !== undefined
+            const included = Object.hasOwn(paidBy, person.id)
 
             return (
               <div
@@ -653,7 +613,7 @@ function UnequalSplitPanel({
   splits,
   onSplitsChange,
 }: {
-  people: User[]
+  people: Array<User>
   totalAmount: string
   currencySymbol: string
   splits: Record<string, SplitEntry>
@@ -664,7 +624,7 @@ function UnequalSplitPanel({
   const total = parseFloat(totalAmount) || 0
   const assigned = people.reduce((sum, person) => {
     const entry = splits[person.id]
-    if (!entry?.included) return sum
+    if (!entry.included) return sum
     return sum + (parseFloat(entry.amount) || 0)
   }, 0)
   const remaining = total - assigned
@@ -674,12 +634,12 @@ function UnequalSplitPanel({
 
   const toggleIncluded = (personId: string) => {
     onSplitsChange((prev) => ({
-      ...prev,
-      [personId]: {
-        ...prev[personId],
-        included: !prev[personId]?.included,
-      },
-    }))
+        ...prev,
+        [personId]: {
+          ...prev[personId],
+          included: !prev[personId].included,
+        },
+      }))
   }
 
   const updateAmount = (personId: string, value: string) => {
@@ -692,9 +652,7 @@ function UnequalSplitPanel({
     }))
   }
 
-  const includedCount = people.filter(
-    (person) => splits[person.id]?.included,
-  ).length
+  const includedCount = people.filter((person) => splits[person.id].included).length
 
   return (
     <FieldRow label="Members">
@@ -708,7 +666,7 @@ function UnequalSplitPanel({
           <div className="divide-y">
             {people.map((person) => {
               const entry = splits[person.id]
-              const included = entry?.included ?? true
+              const included = entry.included
 
               return (
                 <div
@@ -754,7 +712,7 @@ function UnequalSplitPanel({
                       <InputGroupInput
                         type="number"
                         placeholder="0.00"
-                        value={entry?.amount ?? ''}
+                        value={entry.amount}
                         onChange={(e) =>
                           updateAmount(person.id, e.target.value)
                         }
@@ -819,7 +777,7 @@ function distributeAmounts(
   total: number,
   count: number,
   roundToWhole: boolean,
-): string[] {
+): Array<string> {
   if (count === 0) return []
 
   if (roundToWhole) {

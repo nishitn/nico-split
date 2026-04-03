@@ -1,5 +1,5 @@
 import type { User } from '@/features/users/types'
-import type { UUID } from 'crypto'
+import type { UUID } from 'node:crypto'
 import type { LucideIcon } from 'lucide-react'
 
 export interface Group {

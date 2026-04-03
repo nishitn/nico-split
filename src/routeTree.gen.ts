@@ -13,7 +13,6 @@ import { Route as TransactionsRouteImport } from './routes/transactions'
 import { Route as SignInRouteImport } from './routes/sign-in'
 import { Route as MoreRouteImport } from './routes/more'
 import { Route as GroupsRouteImport } from './routes/groups'
-import { Route as DatabaseRouteImport } from './routes/database'
 import { Route as ChartsRouteImport } from './routes/charts'
 import { Route as CategoriesRouteImport } from './routes/categories'
 import { Route as BudgetRouteImport } from './routes/budget'
@@ -44,11 +43,6 @@ const MoreRoute = MoreRouteImport.update({
 const GroupsRoute = GroupsRouteImport.update({
   id: '/groups',
   path: '/groups',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const DatabaseRoute = DatabaseRouteImport.update({
-  id: '/database',
-  path: '/database',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ChartsRoute = ChartsRouteImport.update({
@@ -113,7 +107,6 @@ export interface FileRoutesByFullPath {
   '/budget': typeof BudgetRoute
   '/categories': typeof CategoriesRouteWithChildren
   '/charts': typeof ChartsRoute
-  '/database': typeof DatabaseRoute
   '/groups': typeof GroupsRouteWithChildren
   '/more': typeof MoreRoute
   '/sign-in': typeof SignInRoute
@@ -131,7 +124,6 @@ export interface FileRoutesByTo {
   '/budget': typeof BudgetRoute
   '/categories': typeof CategoriesRouteWithChildren
   '/charts': typeof ChartsRoute
-  '/database': typeof DatabaseRoute
   '/groups': typeof GroupsRouteWithChildren
   '/more': typeof MoreRoute
   '/sign-in': typeof SignInRoute
@@ -150,7 +142,6 @@ export interface FileRoutesById {
   '/budget': typeof BudgetRoute
   '/categories': typeof CategoriesRouteWithChildren
   '/charts': typeof ChartsRoute
-  '/database': typeof DatabaseRoute
   '/groups': typeof GroupsRouteWithChildren
   '/more': typeof MoreRoute
   '/sign-in': typeof SignInRoute
@@ -170,7 +161,6 @@ export interface FileRouteTypes {
     | '/budget'
     | '/categories'
     | '/charts'
-    | '/database'
     | '/groups'
     | '/more'
     | '/sign-in'
@@ -188,7 +178,6 @@ export interface FileRouteTypes {
     | '/budget'
     | '/categories'
     | '/charts'
-    | '/database'
     | '/groups'
     | '/more'
     | '/sign-in'
@@ -206,7 +195,6 @@ export interface FileRouteTypes {
     | '/budget'
     | '/categories'
     | '/charts'
-    | '/database'
     | '/groups'
     | '/more'
     | '/sign-in'
@@ -225,7 +213,6 @@ export interface RootRouteChildren {
   BudgetRoute: typeof BudgetRoute
   CategoriesRoute: typeof CategoriesRouteWithChildren
   ChartsRoute: typeof ChartsRoute
-  DatabaseRoute: typeof DatabaseRoute
   GroupsRoute: typeof GroupsRouteWithChildren
   MoreRoute: typeof MoreRoute
   SignInRoute: typeof SignInRoute
@@ -262,13 +249,6 @@ declare module '@tanstack/react-router' {
       path: '/groups'
       fullPath: '/groups'
       preLoaderRoute: typeof GroupsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/database': {
-      id: '/database'
-      path: '/database'
-      fullPath: '/database'
-      preLoaderRoute: typeof DatabaseRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/charts': {
@@ -404,7 +384,6 @@ const rootRouteChildren: RootRouteChildren = {
   BudgetRoute: BudgetRoute,
   CategoriesRoute: CategoriesRouteWithChildren,
   ChartsRoute: ChartsRoute,
-  DatabaseRoute: DatabaseRoute,
   GroupsRoute: GroupsRouteWithChildren,
   MoreRoute: MoreRoute,
   SignInRoute: SignInRoute,

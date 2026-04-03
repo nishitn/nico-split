@@ -1,17 +1,36 @@
+import { clsx } from 'clsx'
+import { twMerge } from 'tailwind-merge'
+import type { ClassValue } from 'clsx'
 import type {
   GroupSplitMetadata,
+  GroupTransaction,
   GroupTransferMetadata,
+  PersonalTransaction,
   Transaction,
 } from '@/features/transactions/types'
+import type { User } from '@/features/users/types'
 import {
-  GroupTransactionType,
   PersonalTransactionType,
   TransactionScope,
 } from '@/features/transactions/types'
-import type { User } from '@/features/users/types'
-import type { ClassValue } from 'clsx'
-import { clsx } from 'clsx'
-import { twMerge } from 'tailwind-merge'
+
+function isPersonalTransaction(
+  transaction: Transaction,
+): transaction is PersonalTransaction {
+  return transaction.scope === TransactionScope.PERSONAL
+}
+
+function isGroupTransaction(
+  transaction: Transaction,
+): transaction is GroupTransaction {
+  return transaction.scope === TransactionScope.GROUP
+}
+
+function hasGroupSplitMetadata(
+  metadata: GroupTransaction['groupMetadata'],
+): metadata is GroupSplitMetadata {
+  return 'split' in metadata
+}
 
 // UI Helpers
 export function cn(...inputs: Array<ClassValue>) {
@@ -60,29 +79,26 @@ export function getUserAmounts(user: User, t: Transaction) {
   let expense = 0
   let owes = 0
 
-  if (t.scope === TransactionScope.PERSONAL) {
+  if (isPersonalTransaction(t)) {
     if (t.type === PersonalTransactionType.INCOME) {
       income += t.amount
     } else if (t.type === PersonalTransactionType.EXPENSE) {
       expense += t.amount
     }
-  } else if (t.scope === TransactionScope.GROUP) {
-    if (t.type === GroupTransactionType.SPLIT) {
-      const groupMetadata = t.groupMetadata as GroupSplitMetadata
-      const userPaid = groupMetadata.paidBy[user.id] || 0
-      const userSplit = groupMetadata.split[user.id] || 0
-      expense += userPaid
-      owes += userSplit - userPaid
-    } else if (t.type === GroupTransactionType.TRANSFER) {
-      const groupMetadata = t.groupMetadata as GroupTransferMetadata
-      if (groupMetadata.paidBy.id === user.id) {
-        expense += t.amount
-        owes -= t.amount
-      }
-      if (groupMetadata.paidTo.id === user.id) {
-        income += t.amount
-        owes += t.amount
-      }
+  } else if (isGroupTransaction(t) && hasGroupSplitMetadata(t.groupMetadata)) {
+    const userPaid = t.groupMetadata.paidBy[user.id] || 0
+    const userSplit = t.groupMetadata.split[user.id] || 0
+    expense += userPaid
+    owes += userSplit - userPaid
+  } else if (isGroupTransaction(t)) {
+    const groupMetadata = t.groupMetadata as GroupTransferMetadata
+    if (groupMetadata.paidBy.id === user.id) {
+      expense += t.amount
+      owes -= t.amount
+    }
+    if (groupMetadata.paidTo.id === user.id) {
+      income += t.amount
+      owes += t.amount
     }
   }
 
@@ -142,14 +158,14 @@ export function getPaidByText(
   if (paidByLen === 0) {
     throw new Error('No paidBy found')
   } else if (paidByLen === 1) {
-    if (paidBy[user.id] !== undefined) {
+    if (Object.hasOwn(paidBy, user.id)) {
       paidByText = 'You'
     } else {
       const payeeId = Object.keys(paidBy)[0]
       paidByText = members.find((m) => m.id === payeeId)?.name || 'Unknown'
     }
   } else {
-    if (paidBy[user.id] !== undefined) {
+    if (Object.hasOwn(paidBy, user.id)) {
       paidByText = `You + ${paidByLen - 1} others`
     } else {
       paidByText = 'Multiple People'

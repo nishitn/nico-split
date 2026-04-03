@@ -1,7 +1,6 @@
+import { Car, Film, Home, Users, Utensils, Wallet } from 'lucide-react'
 import type { Account } from '@/features/accounts/types'
-import { AccountType, Currency } from '@/features/accounts/types'
 import type { Category } from '@/features/categories/types'
-import { CategoryType } from '@/features/categories/types'
 import type { Chapter } from '@/features/chapters/types'
 import type { Group } from '@/features/groups/types'
 import type {
@@ -9,14 +8,15 @@ import type {
   PersonalTransaction,
   Transaction,
 } from '@/features/transactions/types'
+import type { User } from '@/features/users/types'
+import type { UUID } from 'node:crypto'
 import {
   GroupTransactionType,
   PersonalTransactionType,
   TransactionScope,
 } from '@/features/transactions/types'
-import type { User } from '@/features/users/types'
-import type { UUID } from 'crypto'
-import { Car, Film, Home, Users, Utensils, Wallet } from 'lucide-react'
+import { CategoryType } from '@/features/categories/types'
+import { AccountType, Currency } from '@/features/accounts/types'
 
 // Users
 export const mockUsers: Array<User> = [

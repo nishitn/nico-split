@@ -1,3 +1,5 @@
+import { format } from 'date-fns'
+import { CalendarIcon } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Calendar } from '@/components/ui/calendar'
 import { Input } from '@/components/ui/input'
@@ -20,8 +22,6 @@ import {
 } from '@/components/ui/select'
 import { CURRENCY_META, Currency } from '@/features/accounts/types'
 import { cn } from '@/lib/utils'
-import { format } from 'date-fns'
-import { CalendarIcon } from 'lucide-react'
 
 export interface RequiredFormData {
   amount: string
@@ -109,17 +109,10 @@ export function DateInput({
       <PopoverTrigger asChild>
         <Button
           variant="outline"
-          className={cn(
-            'w-full justify-start bg-transparent text-left font-normal',
-            !formData.date && 'text-muted-foreground',
-          )}
+          className={cn('w-full justify-start bg-transparent text-left font-normal')}
         >
           <CalendarIcon className="mr-2 h-4 w-4" />
-          {formData.date ? (
-            format(formData.date, 'PPP')
-          ) : (
-            <span>Pick a date</span>
-          )}
+          {format(formData.date, 'PPP')}
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-auto p-0" align="start">

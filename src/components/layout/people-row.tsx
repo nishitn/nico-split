@@ -1,8 +1,8 @@
+import { User } from 'lucide-react'
+import type { PeopleBalance } from '@/features/users/types'
 import { CurrencySpan } from '@/components/ui/currency-span'
 import { NsCard, NsContent, NsIcon, NsMainRow } from '@/components/ui/ns-card'
-import type { PeopleBalance } from '@/features/users/types'
 import { getOwesColor, getOwesText } from '@/lib/utils'
-import { User } from 'lucide-react'
 
 export function PeopleRow({ peopleBalance }: { peopleBalance: PeopleBalance }) {
   const owesColor = getOwesColor(peopleBalance.owes, 'text-card-foreground')

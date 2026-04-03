@@ -1,3 +1,12 @@
+import {
+  Outlet,
+  createFileRoute,
+  useChildMatches,
+  useNavigate,
+} from '@tanstack/react-router'
+import { useMemo } from 'react'
+import { z } from 'zod'
+import type { ReactNode } from 'react'
 import { AppLayout } from '@/components/layout/app-layout'
 import { DayTransactionRow } from '@/components/layout/day-transaction-row'
 import { RouteToolbar } from '@/components/layout/route-toolbar'
@@ -10,15 +19,6 @@ import { useMonthlyStats, useTransactions } from '@/features/transactions/api'
 import { useCurrentUser } from '@/features/users/api'
 import { dateString, groupTransactionsByDate } from '@/lib/transactions-util'
 import { cn, getAmountsColor, getOwesColor, getOwesText } from '@/lib/utils'
-import {
-  createFileRoute,
-  Outlet,
-  useChildMatches,
-  useNavigate,
-} from '@tanstack/react-router'
-import type { ReactNode } from 'react'
-import { useMemo } from 'react'
-import { z } from 'zod'
 
 // Schema for search params
 const transactionsSearchSchema = z.object({
@@ -58,7 +58,7 @@ function TransactionsPage() {
   )
   // #endregion
 
-  if (childMatches.length > 0) {
+  if (childMatches.length) {
     return <Outlet />
   }
 
@@ -73,9 +73,6 @@ function TransactionsPage() {
       },
     })
   }
-
-  if (!user)
-    return <div className="flex justify-center p-8">Loading user...</div>
 
   let summaryStats: ReactNode
   if (isStatsLoading) {

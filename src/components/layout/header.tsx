@@ -7,9 +7,14 @@ import { Separator } from '@/components/ui/separator'
 export function MobileHeader({
   routeTitle,
   routeSubtitle,
+  mobileAction,
 }: {
   routeTitle?: string
   routeSubtitle?: string
+  mobileAction?: {
+    to: string
+    text: string
+  }
 }) {
   const location = useLocation()
   const navigate = useNavigate()
@@ -29,6 +34,11 @@ export function MobileHeader({
           </Button>
           <div className="min-w-0">
             {routeTitle && <p className="truncate text-lg font-semibold">{routeTitle}</p>}
+            {routeSubtitle ? (
+              <p className="text-muted-foreground truncate text-xs">
+                {routeSubtitle}
+              </p>
+            ) : null}
           </div>
         </div>
         <Separator />
@@ -41,6 +51,11 @@ export function MobileHeader({
       <div className="flex w-full flex-col">
         <div className="flex items-center gap-2 px-4">
           <MainLogo />
+          {mobileAction ? (
+            <span className="text-muted-foreground truncate text-xs">
+              {mobileAction.text}
+            </span>
+          ) : null}
         </div>
         <Separator />
       </div>

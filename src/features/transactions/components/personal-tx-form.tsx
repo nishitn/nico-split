@@ -1,3 +1,23 @@
+import { useNavigate } from '@tanstack/react-router'
+import {
+  ArrowRightLeft,
+  CheckIcon,
+  ChevronDownIcon,
+  ChevronRightIcon,
+  TrendingDownIcon,
+  TrendingUpIcon,
+} from 'lucide-react'
+import { useEffect, useMemo, useState } from 'react'
+import {
+  AmountInput,
+  DateInput,
+  TimeInput,
+} from './common-tx-input'
+import type {
+  LucideIcon} from 'lucide-react';
+import type {
+  RequiredFormData} from './common-tx-input';
+import type { Category } from '@/features/categories/types'
 import { FormSection } from '@/components/layout/form-section'
 import { Button } from '@/components/ui/button'
 import { FieldRow } from '@/components/ui/field-row'
@@ -18,27 +38,9 @@ import {
 import { useAccounts } from '@/features/accounts/api'
 import { CURRENCY_META, Currency } from '@/features/accounts/types'
 import { useCategories } from '@/features/categories/api'
-import { Category } from '@/features/categories/types'
 import { useChapters } from '@/features/chapters/api'
 import { PersonalTransactionType } from '@/features/transactions/types'
 import { cn } from '@/lib/utils'
-import { useNavigate } from '@tanstack/react-router'
-import {
-  ArrowRightLeft,
-  CheckIcon,
-  ChevronDownIcon,
-  ChevronRightIcon,
-  LucideIcon,
-  TrendingDownIcon,
-  TrendingUpIcon,
-} from 'lucide-react'
-import { useEffect, useMemo, useState } from 'react'
-import {
-  AmountInput,
-  DateInput,
-  RequiredFormData,
-  TimeInput,
-} from './common-tx-input'
 
 // #region Types
 
@@ -49,12 +51,12 @@ interface PersonalTxMetadata {
   toAccountId?: string
 }
 
-const PTX_TYPE_OPTIONS: {
+const PTX_TYPE_OPTIONS: Array<{
   type: PersonalTransactionType
   label: string
   icon: LucideIcon
   selectedColor: string
-}[] = [
+}> = [
   {
     type: PersonalTransactionType.EXPENSE,
     label: 'Expense',
@@ -379,14 +381,14 @@ function ChapterInput({
 }
 
 interface CategoryNode extends Category {
-  children: CategoryNode[]
+  children: Array<CategoryNode>
 }
 
-function buildCategoryTree(categories: Category[]): CategoryNode[] {
+function buildCategoryTree(categories: Array<Category>): Array<CategoryNode> {
   const categoryMap = new Map<string, CategoryNode>()
   categories.forEach((cat) => categoryMap.set(cat.id, { ...cat, children: [] }))
 
-  const tree: CategoryNode[] = []
+  const tree: Array<CategoryNode> = []
   const subCategoryIds = new Set(categories.flatMap((cat) => cat.subCategories))
 
   categories.forEach((cat) => {
@@ -513,10 +515,10 @@ function RecursiveCategoryItem({
 }
 
 function findCategoryPath(
-  nodes: CategoryNode[],
+  nodes: Array<CategoryNode>,
   targetId: string,
-  path: Category[] = [],
-): Category[] | null {
+  path: Array<Category> = [],
+): Array<Category> | null {
   for (const node of nodes) {
     if (node.id === targetId) return [...path, node]
     if (node.children.length > 0) {
@@ -581,7 +583,7 @@ function CategoryInput({
             <div className="flex items-center gap-3 overflow-hidden text-sm">
               <selectedCategory.icon className="text-foreground size-4 shrink-0" />
               <div className="flex flex-1 items-center gap-1.5 overflow-hidden">
-                {selectedPath?.map((c, i) => (
+                {selectedPath.map((c, i) => (
                   <span
                     key={c.id}
                     className="flex items-center gap-1.5 overflow-hidden"

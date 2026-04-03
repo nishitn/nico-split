@@ -1,8 +1,31 @@
+import {
+  GroupTransactionType,
+  PersonalTransactionType,
+  SplitType,
+  TransactionScope,
+} from '../../../backend/enums'
+import type {
+  GroupTransactionTypeValue,
+  PersonalTransactionTypeValue,
+  SplitTypeValue,
+  TransactionScopeValue,
+} from '../../../backend/enums'
 import type { Account, Currency } from '@/features/accounts/types'
 import type { Category } from '@/features/categories/types'
 import type { Group } from '@/features/groups/types'
 import type { User } from '@/features/users/types'
-import type { UUID } from 'crypto'
+import type { UUID } from 'node:crypto'
+
+export {
+  GroupTransactionType,
+  PersonalTransactionType,
+  SplitType,
+  TransactionScope,
+}
+export type GroupTransactionType = GroupTransactionTypeValue
+export type PersonalTransactionType = PersonalTransactionTypeValue
+export type SplitType = SplitTypeValue
+export type TransactionScope = TransactionScopeValue
 
 export interface BaseTransaction {
   id: UUID
@@ -13,21 +36,10 @@ export interface BaseTransaction {
   createdBy: User
 }
 
-export enum TransactionScope {
-  PERSONAL = 'personal',
-  GROUP = 'group',
-}
-
 export interface PersonalTransaction extends BaseTransaction {
-  scope: TransactionScope.PERSONAL
+  scope: typeof TransactionScope.PERSONAL
   type: PersonalTransactionType
   metadata: UserMetadata
-}
-
-export enum PersonalTransactionType {
-  INCOME = 'income',
-  EXPENSE = 'expense',
-  TRANSFER = 'transfer',
 }
 
 export interface UserMetadata {
@@ -38,20 +50,10 @@ export interface UserMetadata {
 
 export interface GroupTransaction extends BaseTransaction {
   group: Group
-  scope: TransactionScope.GROUP
+  scope: typeof TransactionScope.GROUP
   type: GroupTransactionType
   groupMetadata: GroupSplitMetadata | GroupTransferMetadata
   userMetadata: UserMetadata
-}
-
-export enum GroupTransactionType {
-  SPLIT = 'split',
-  TRANSFER = 'transfer',
-}
-
-export enum SplitType {
-  EQUAL = 'equal',
-  UNEQUAL = 'unequal',
 }
 
 export interface GroupSplitMetadata {

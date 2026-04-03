@@ -1,3 +1,4 @@
+import type { GroupBalance } from '@/features/groups/types'
 import { CurrencySpan } from '@/components/ui/currency-span'
 import {
   NsCard,
@@ -7,7 +8,6 @@ import {
   NsSubRow,
 } from '@/components/ui/ns-card'
 import { Separator } from '@/components/ui/separator'
-import type { GroupBalance } from '@/features/groups/types'
 import { getOwesColor, getOwesText } from '@/lib/utils'
 
 export function GroupRow({ groupBalance }: { groupBalance: GroupBalance }) {

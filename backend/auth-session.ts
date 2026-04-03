@@ -1,4 +1,6 @@
 import { createServerFn, createServerOnlyFn } from '@tanstack/react-start'
+import { getRequestHeaders } from '@tanstack/react-start/server'
+import { auth, googleAuthEnabled } from './auth'
 
 interface AuthState {
   googleAuthEnabled: boolean
@@ -25,22 +27,12 @@ export async function requireAuthSession() {
 }
 
 const getRequiredAuthSession = createServerOnlyFn(async () => {
-  const [{ auth }, { getRequestHeaders }] = await Promise.all([
-    import('./auth'),
-    import('@tanstack/react-start/server'),
-  ])
-
   return auth.api.getSession({
     headers: getRequestHeaders(),
   })
 })
 
 const getServerAuthState = createServerOnlyFn(async (): Promise<AuthState> => {
-  const [{ auth, googleAuthEnabled }, { getRequestHeaders }] =
-    await Promise.all([
-      import('./auth'),
-      import('@tanstack/react-start/server'),
-    ])
   const session = await auth.api.getSession({
     headers: getRequestHeaders(),
   })

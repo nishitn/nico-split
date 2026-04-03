@@ -1,5 +1,5 @@
-import type { LucideIcon } from 'lucide-react'
 import { Car, Film, Home, Users, Utensils, Wallet } from 'lucide-react'
+import type { LucideIcon } from 'lucide-react'
 
 export const iconRegistry = {
   car: Car,

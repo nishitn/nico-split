@@ -1,3 +1,7 @@
+import { UsersIcon } from 'lucide-react'
+import type { Group } from '@/features/groups/types'
+import type { User } from '@/features/users/types'
+import type { ReactNode } from 'react'
 import {
   Combobox,
   ComboboxChip,
@@ -17,12 +21,8 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { useGroups } from '@/features/groups/api'
-import type { Group } from '@/features/groups/types'
-import { useUsers } from '@/features/users/api'
-import type { User } from '@/features/users/types'
+import { useCurrentUser, useFriends } from '@/features/users/api'
 import { cn } from '@/lib/utils'
-import { UsersIcon } from 'lucide-react'
-import { ReactNode } from 'react'
 
 export type SelectionMode = 'group' | 'manual' | 'none'
 
@@ -63,7 +63,7 @@ export function GroupPeopleInput({
     })
   }
 
-  const handlePeopleChange = (people: User[]) => {
+  const handlePeopleChange = (people: Array<User>) => {
     updateMetadata({
       members: people,
       selectionMode: people.length > 0 ? 'manual' : 'none',
@@ -114,7 +114,7 @@ export function UserSelect({
   onChange,
   placeholder,
 }: {
-  people: User[]
+  people: Array<User>
   value: string
   onChange: (value: string) => void
   placeholder: string
@@ -147,7 +147,7 @@ function GroupSelector({
   onClear,
   disabled,
 }: {
-  groups: Group[]
+  groups: Array<Group>
   isLoading: boolean
   selectedGroupId: string
   onGroupChange: (groupId: string) => void
@@ -233,18 +233,23 @@ function PeopleChipsInput({
   onPeopleChange,
   disabled,
 }: {
-  selectedPeople: User[]
-  onPeopleChange: (people: User[]) => void
+  selectedPeople: Array<User>
+  onPeopleChange: (people: Array<User>) => void
   disabled: boolean
 }) {
-  const { data: allUsers = [] } = useUsers()
+  const { data: currentUser } = useCurrentUser()
+  const { data: friends = [] } = useFriends()
   const chipsAnchor = useComboboxAnchor()
+  const allUsers = [currentUser, ...friends].filter(
+    (user, index, users) =>
+      users.findIndex((candidate) => candidate.id === user.id) === index,
+  )
 
   const availableUsers = allUsers.filter(
     (user) => !selectedPeople.some((person) => person.id === user.id),
   )
 
-  const handleSelectionChange = (selectedValues: string[]) => {
+  const handleSelectionChange = (selectedValues: Array<string>) => {
     const newPeople = selectedValues
       .map((id) => allUsers.find((user) => user.id === id)!)
       .filter(Boolean)

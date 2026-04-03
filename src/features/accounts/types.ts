@@ -1,5 +1,3 @@
-import type { UUID } from 'crypto'
-import type { LucideIcon } from 'lucide-react'
 import {
   Banknote,
   Building2,
@@ -9,40 +7,17 @@ import {
   TrendingDown,
   Wallet,
 } from 'lucide-react'
+import { AccountType, Currency } from '../../../backend/enums'
+import type { LucideIcon } from 'lucide-react'
+import type { UUID } from 'node:crypto'
+import type {
+  AccountTypeValue,
+  CurrencyValue,
+} from '../../../backend/enums'
 
-export enum AccountType {
-  CASH = 'cash',
-  BANK = 'bank',
-  CREDIT_CARD = 'credit_card',
-  DEBIT_CARD = 'debit_card',
-  WALLET = 'wallet',
-  LOAN = 'loan',
-  INVESTMENT = 'investment',
-  OTHER = 'other',
-}
-
-export enum Currency {
-  INR = 'inr',
-  USD = 'usd',
-  EUR = 'eur',
-  GBP = 'gbp',
-  JPY = 'jpy',
-  CNY = 'cny',
-  AUD = 'aud',
-  CAD = 'cad',
-  CHF = 'chf',
-  SEK = 'sek',
-  NOK = 'nok',
-  DKK = 'dkk',
-  NZD = 'nzd',
-  SGD = 'sgd',
-  HKD = 'hkd',
-  KRW = 'krw',
-  TRY = 'try',
-  BRL = 'brl',
-  ZAR = 'zar',
-  RUB = 'rub',
-}
+export { AccountType, Currency }
+export type AccountType = AccountTypeValue
+export type Currency = CurrencyValue
 
 export interface Account {
   id: UUID
@@ -55,11 +30,11 @@ export interface Account {
 
 // ─── Account Type Options ────────────────────────────────────────────────────
 
-export const ACCOUNT_TYPE_OPTIONS: {
+export const ACCOUNT_TYPE_OPTIONS: Array<{
   type: AccountType
   label: string
   icon: LucideIcon
-}[] = [
+}> = [
   { type: AccountType.CASH, label: 'Cash', icon: Banknote },
   { type: AccountType.BANK, label: 'Bank', icon: Building2 },
   { type: AccountType.CREDIT_CARD, label: 'Credit', icon: CreditCard },

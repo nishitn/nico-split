@@ -1,7 +1,7 @@
-import { AppLayout } from '@/components/layout/app-layout'
-import { navItems } from '@/config/nav'
 import { Link, createFileRoute } from '@tanstack/react-router'
 import { ChevronRight } from 'lucide-react'
+import { AppLayout } from '@/components/layout/app-layout'
+import { navItems } from '@/config/nav'
 
 export const Route = createFileRoute('/more')({
   component: MorePage,

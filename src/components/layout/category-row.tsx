@@ -1,3 +1,6 @@
+import { ChevronDown, ChevronUp } from 'lucide-react'
+import type { CategoryStat } from '@/features/categories/types'
+import type { UUID } from 'node:crypto'
 import { Button } from '@/components/ui/button'
 import { CurrencySpan } from '@/components/ui/currency-span'
 import {
@@ -9,10 +12,7 @@ import {
   NsSubRow,
 } from '@/components/ui/ns-card'
 import { Separator } from '@/components/ui/separator'
-import type { CategoryStat } from '@/features/categories/types'
 import { CategoryType } from '@/features/categories/types'
-import type { UUID } from 'crypto'
-import { ChevronDown, ChevronUp } from 'lucide-react'
 
 export interface CategoryRowProps {
   categoryStat: CategoryStat
@@ -30,7 +30,7 @@ export function CategoryRow({
       ? 'text-expense'
       : 'text-income'
 
-  const subCategories = categoryStat.subcategories || []
+  const subCategories = categoryStat.subcategories
   const hasSubCategories = subCategories.length > 0
 
   const reducePadding = hasSubCategories ? 'flex-col' : ''
@@ -67,7 +67,7 @@ export function SubCategorySection({
   isExpanded,
   onToggle,
 }: CategoryRowProps) {
-  const subCategories = categoryStat.subcategories || []
+  const subCategories = categoryStat.subcategories
 
   return (
     <div>

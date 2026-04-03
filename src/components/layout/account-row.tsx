@@ -1,3 +1,4 @@
+import type { Account } from '@/features/accounts/types'
 import {
   NsAmount,
   NsCard,
@@ -5,7 +6,6 @@ import {
   NsIcon,
   NsMainRow,
 } from '@/components/ui/ns-card'
-import { Account } from '@/features/accounts/types'
 import { getAmountsColor } from '@/lib/utils'
 
 export function AccountRow({ account }: { account: Account }) {

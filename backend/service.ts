@@ -1,26 +1,52 @@
+import { getDatabase } from '@db/database'
+import type { CategoryDto, CategoryStatDto } from './dto/category-dto'
 import type {
-  CategoryDto,
-  CategoryStatDto,
   DatabaseTableDto,
   DatabaseTablePreviewDto,
+} from './dto/database-dto'
+import type {
   GroupBalanceDto,
+  GroupSplitMetadataDto,
+  GroupTransferMetadataDto,
+} from './dto/group-dto'
+import type { PeopleBalanceDto } from './dto/people-balance-dto'
+import type {
+  GroupTransactionDto,
   MonthlyStatsDto,
-  PeopleBalanceDto,
   TransactionDto,
-  UserDto,
-} from './contracts'
-import { getDatabase } from './database'
+} from './dto/transaction-dto'
 import {
   loadAccounts,
   loadCategories,
   loadChapters,
+  loadFriends,
   loadGroups,
   loadTransactions,
   loadUsers,
 } from './repository'
+import type { UserRecord } from './schema'
+import { ensureUserSeedData } from './seed'
+
+function isGroupSplitMetadataDto(
+  groupMetadata: GroupTransactionDto['groupMetadata'],
+): groupMetadata is GroupSplitMetadataDto {
+  return 'split' in groupMetadata
+}
+
+function isGroupTransferMetadataDto(
+  groupMetadata: GroupTransactionDto['groupMetadata'],
+): groupMetadata is GroupTransferMetadataDto {
+  return 'paidTo' in groupMetadata
+}
+
+function isGroupTransactionDto(
+  transaction: TransactionDto,
+): transaction is GroupTransactionDto {
+  return transaction.scope === 'group'
+}
 
 function getUserOwes(
-  user: UserDto,
+  user: UserRecord,
   paidBy: Record<string, number>,
   split: Record<string, number>,
 ) {
@@ -30,7 +56,7 @@ function getUserOwes(
   return userSplit - userPaid
 }
 
-function getUserAmounts(user: UserDto, transaction: TransactionDto) {
+function getUserAmounts(user: UserRecord, transaction: TransactionDto) {
   let income = 0
   let expense = 0
   let owes = 0
@@ -41,12 +67,12 @@ function getUserAmounts(user: UserDto, transaction: TransactionDto) {
     } else if (transaction.type === 'expense') {
       expense += transaction.amount
     }
-  } else if (transaction.type === 'split') {
+  } else if (isGroupSplitMetadataDto(transaction.groupMetadata)) {
     const userPaid = transaction.groupMetadata.paidBy[user.id] || 0
     const userSplit = transaction.groupMetadata.split[user.id] || 0
     expense += userPaid
     owes += userSplit - userPaid
-  } else if (transaction.type === 'transfer') {
+  } else if (isGroupTransferMetadataDto(transaction.groupMetadata)) {
     if (transaction.groupMetadata.paidBy.id === user.id) {
       expense += transaction.amount
       owes -= transaction.amount
@@ -106,37 +132,26 @@ function isInMonth(transaction: TransactionDto, month: number, year: number) {
   return date.getMonth() === month && date.getFullYear() === year
 }
 
-function applyCurrentUserName(
-  users: Array<UserDto>,
-  currentUserName?: string,
-): Array<UserDto> {
-  if (!currentUserName) {
-    return users
-  }
-
-  return users.map((user, index) =>
-    index === 0
-      ? {
-          ...user,
-          name: currentUserName,
-        }
-      : user,
+function loadAppData(userId: string) {
+  ensureUserSeedData(userId)
+  const users = loadUsers()
+  const accounts = loadAccounts(userId)
+  const categories = loadCategories(userId)
+  const chapters = loadChapters(userId)
+  const groups = loadGroups(userId, users)
+  const transactions = loadTransactions(
+    userId,
+    users,
+    accounts,
+    categories,
+    groups,
   )
-}
-
-function loadAppData(currentUserName?: string) {
-  const users = applyCurrentUserName(loadUsers(), currentUserName)
-  const accounts = loadAccounts()
-  const categories = loadCategories()
-  const chapters = loadChapters()
-  const groups = loadGroups(users)
-  const transactions = loadTransactions(users, accounts, categories, groups)
 
   return { users, accounts, categories, chapters, groups, transactions }
 }
 
-function getUserById(userId: string, currentUserName?: string) {
-  const { users } = loadAppData(currentUserName)
+function getUserById(userId: string) {
+  const { users } = loadAppData(userId)
   const user = users.find((candidate) => candidate.id === userId)
 
   if (!user) {
@@ -148,7 +163,7 @@ function getUserById(userId: string, currentUserName?: string) {
 
 function getAmountForCategory(
   category: CategoryDto,
-  user: UserDto,
+  user: UserRecord,
   transactions: Array<TransactionDto>,
 ) {
   return transactions
@@ -157,8 +172,8 @@ function getAmountForCategory(
         return transaction.metadata.category?.id === category.id
       }
 
-      if (transaction.type === 'split') {
-        return transaction.groupMetadata.category?.id === category.id
+      if (isGroupSplitMetadataDto(transaction.groupMetadata)) {
+        return transaction.userMetadata.category?.id === category.id
       }
 
       return false
@@ -169,48 +184,48 @@ function getAmountForCategory(
     }, 0)
 }
 
-export function getUsers(currentUserName?: string) {
-  return loadAppData(currentUserName).users
+export function getUsers() {
+  return loadUsers()
 }
 
-export function getCurrentUser(currentUserName?: string) {
-  return loadAppData(currentUserName).users[0]
+export function getFriends(userId: string) {
+  return loadFriends(userId)
 }
 
-export function getAccounts() {
-  return loadAccounts()
+export function getCurrentUser(userId: string) {
+  return getUserById(userId)
 }
 
-export function getCategories() {
-  return loadCategories()
+export function getAccounts(userId: string) {
+  return loadAccounts(userId)
 }
 
-export function getChapters() {
-  return loadChapters()
+export function getCategories(userId: string) {
+  return loadCategories(userId)
 }
 
-export function getGroups(currentUserName?: string) {
-  const users = applyCurrentUserName(loadUsers(), currentUserName)
-  return loadGroups(users)
+export function getChapters(userId: string) {
+  return loadChapters(userId)
 }
 
-export function getTransactions(
-  month: number,
-  year: number,
-  currentUserName?: string,
-) {
-  const { transactions } = loadAppData(currentUserName)
-  return transactions.filter((transaction) => isInMonth(transaction, month, year))
+export function getGroups(userId: string) {
+  return loadGroups(userId, loadUsers())
+}
+
+export function getTransactions(userId: string, month: number, year: number) {
+  const { transactions } = loadAppData(userId)
+  return transactions.filter((transaction) =>
+    isInMonth(transaction, month, year),
+  )
 }
 
 export function getGroupBalances(
   userId: string,
   month: number,
   year: number,
-  currentUserName?: string,
 ): Array<GroupBalanceDto> {
-  const { groups, transactions } = loadAppData(currentUserName)
-  const user = getUserById(userId, currentUserName)
+  const { groups, transactions } = loadAppData(userId)
+  const user = getUserById(userId)
 
   return groups.map((group) => {
     const monthlyOwes: Record<string, number> = {}
@@ -224,19 +239,20 @@ export function getGroupBalances(
     })
 
     const groupTransactions = transactions.filter(
-      (transaction) =>
-        transaction.scope === 'group' && transaction.group.id === group.id,
+      (transaction): transaction is GroupTransactionDto =>
+        isGroupTransactionDto(transaction) && transaction.group.id === group.id,
     )
 
     for (const transaction of groupTransactions) {
       const currentMonth = isInMonth(transaction, month, year)
+      const groupMetadata = transaction.groupMetadata
 
-      if (transaction.type === 'split') {
+      if (isGroupSplitMetadataDto(groupMetadata)) {
         group.members.forEach((member) => {
           const net = getUserOwes(
             member,
-            transaction.groupMetadata.paidBy,
-            transaction.groupMetadata.split,
+            groupMetadata.paidBy,
+            groupMetadata.split,
           )
           overallNet[member.id] += net
 
@@ -248,12 +264,12 @@ export function getGroupBalances(
         continue
       }
 
-      overallNet[transaction.groupMetadata.paidBy.id] -= transaction.amount
-      overallNet[transaction.groupMetadata.paidTo.id] += transaction.amount
+      overallNet[groupMetadata.paidBy.id] -= transaction.amount
+      overallNet[groupMetadata.paidTo.id] += transaction.amount
 
       if (currentMonth) {
-        monthlyNet[transaction.groupMetadata.paidBy.id] -= transaction.amount
-        monthlyNet[transaction.groupMetadata.paidTo.id] += transaction.amount
+        monthlyNet[groupMetadata.paidBy.id] -= transaction.amount
+        monthlyNet[groupMetadata.paidTo.id] += transaction.amount
       }
     }
 
@@ -293,10 +309,9 @@ export function getMonthlyStats(
   userId: string,
   month: number,
   year: number,
-  currentUserName?: string,
 ): MonthlyStatsDto {
-  const user = getUserById(userId, currentUserName)
-  const monthTransactions = getTransactions(month, year, currentUserName)
+  const user = getUserById(userId)
+  const monthTransactions = getTransactions(userId, month, year)
 
   return monthTransactions.reduce(
     (totals, transaction) => {
@@ -314,11 +329,10 @@ export function getCategoryStats(
   userId: string,
   month: number,
   year: number,
-  currentUserName?: string,
 ): Array<CategoryStatDto> {
-  const { categories } = loadAppData(currentUserName)
-  const user = getUserById(userId, currentUserName)
-  const monthTransactions = getTransactions(month, year, currentUserName)
+  const { categories } = loadAppData(userId)
+  const user = getUserById(userId)
+  const monthTransactions = getTransactions(userId, month, year)
   const allSubCategoryIds = new Set(
     categories.flatMap((category) => category.subCategories),
   )
@@ -354,22 +368,20 @@ export function getCategoryStats(
     .filter((categoryStat) => categoryStat.amount !== 0)
 }
 
-export function getPeopleBalances(
-  userId: string,
-  currentUserName?: string,
-): Array<PeopleBalanceDto> {
+export function getPeopleBalances(userId: string): Array<PeopleBalanceDto> {
   const now = new Date()
   const groupBalances = getGroupBalances(
     userId,
     now.getMonth(),
     now.getFullYear(),
-    currentUserName,
   )
   const peopleMap: Record<string, number> = {}
-  const { users } = loadAppData(currentUserName)
+  const { users } = loadAppData(userId)
 
   for (const groupBalance of groupBalances) {
-    for (const [otherUserId, owes] of Object.entries(groupBalance.overallOwes)) {
+    for (const [otherUserId, owes] of Object.entries(
+      groupBalance.overallOwes,
+    )) {
       peopleMap[otherUserId] = (peopleMap[otherUserId] || 0) + owes
     }
   }
@@ -441,7 +453,9 @@ export function getDatabaseTablePreview(
   previewLimit = 25,
 ): DatabaseTablePreviewDto {
   const db = getDatabase()
-  const availableTables = new Set(getDatabaseTables().map((table) => table.name))
+  const availableTables = new Set(
+    getDatabaseTables().map((table) => table.name),
+  )
 
   if (!availableTables.has(tableName)) {
     throw new Error(`Unknown table ${tableName}`)

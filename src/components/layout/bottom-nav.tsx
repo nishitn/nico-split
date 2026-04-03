@@ -1,8 +1,8 @@
-import { getActiveFormContext } from '@/components/layout/layout-route'
-import type { NavItem } from '@/components/layout/app-layout'
-import { NavLink } from '@/components/ui/nav-link'
 import { useLocation } from '@tanstack/react-router'
 import { MoreHorizontal } from 'lucide-react'
+import type { NavItem } from '@/components/layout/app-layout'
+import { getActiveFormContext } from '@/components/layout/layout-route'
+import { NavLink } from '@/components/ui/nav-link'
 
 export interface BottomNavProps {
   navItems: Array<NavItem>

@@ -1,8 +1,8 @@
+import { User } from 'lucide-react'
+import type { LucideIcon } from 'lucide-react'
+import type { ReactNode } from 'react'
 import { CurrencySpan } from '@/components/ui/currency-span'
 import { cn } from '@/lib/utils'
-import type { LucideIcon } from 'lucide-react'
-import { User } from 'lucide-react'
-import type { ReactNode } from 'react'
 
 export interface NsCardProps {
   children: ReactNode

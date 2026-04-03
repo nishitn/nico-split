@@ -1,13 +1,14 @@
+import { createFileRoute } from '@tanstack/react-router'
+import { ArrowRightLeft, UserIcon, UsersIcon } from 'lucide-react'
+import { useState } from 'react'
+import { z } from 'zod'
+import type { LucideIcon} from 'lucide-react';
 import { AppLayout } from '@/components/layout/app-layout'
 import { FormSection } from '@/components/layout/form-section'
 import { FormNavButton } from '@/components/ui/form-nav-button'
 import { GroupSplitTxFormSection } from '@/features/transactions/components/group-split-tx-form'
 import { GroupTransferTxFormSection } from '@/features/transactions/components/group-transfer-tx-form'
 import { PersonTxFormSection } from '@/features/transactions/components/personal-tx-form'
-import { createFileRoute } from '@tanstack/react-router'
-import { ArrowRightLeft, LucideIcon, UserIcon, UsersIcon } from 'lucide-react'
-import { useState } from 'react'
-import { z } from 'zod'
 
 // #region Route
 
@@ -26,11 +27,11 @@ export const Route = createFileRoute('/transactions/form')({
 
 type TxTypeHeading = 'personal' | 'split' | 'user_transfer'
 
-const TX_TYPE_OPTIONS: {
+const TX_TYPE_OPTIONS: Array<{
   type: TxTypeHeading
   label: string
   icon: LucideIcon
-}[] = [
+}> = [
   {
     type: 'personal',
     label: 'Personal',

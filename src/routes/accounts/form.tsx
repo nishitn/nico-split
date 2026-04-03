@@ -2,6 +2,23 @@ import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import * as React from 'react'
 import { z } from 'zod'
 
+import {
+  Banknote,
+  Building2,
+  CheckIcon,
+  ChevronDownIcon,
+  CreditCard,
+  Landmark,
+  LineChart,
+  MoreHorizontal,
+  PiggyBank,
+  SearchIcon,
+  ShieldCheck,
+  Smartphone,
+  TrendingDown,
+  Wallet,
+} from 'lucide-react'
+import type { LucideIcon } from 'lucide-react'
 import { AppLayout } from '@/components/layout/app-layout'
 import { FormSection } from '@/components/layout/form-section'
 import { Button } from '@/components/ui/button'
@@ -30,23 +47,6 @@ import {
   CURRENCY_META,
   Currency,
 } from '@/features/accounts/types'
-import type { LucideIcon } from 'lucide-react'
-import {
-  Banknote,
-  Building2,
-  CheckIcon,
-  ChevronDownIcon,
-  CreditCard,
-  Landmark,
-  LineChart,
-  MoreHorizontal,
-  PiggyBank,
-  SearchIcon,
-  ShieldCheck,
-  Smartphone,
-  TrendingDown,
-  Wallet,
-} from 'lucide-react'
 
 const searchSchema = z.object({
   id: z.string().optional(),
@@ -57,11 +57,11 @@ export const Route = createFileRoute('/accounts/form')({
   validateSearch: searchSchema,
 })
 
-const ACCOUNT_TYPE_OPTIONS_ORDERED: {
+const ACCOUNT_TYPE_OPTIONS_ORDERED: Array<{
   type: AccountType
   label: string
   icon: LucideIcon
-}[] = ACCOUNT_TYPE_OPTIONS
+}> = ACCOUNT_TYPE_OPTIONS
 
 interface AccountIconOption {
   value: string
@@ -69,7 +69,7 @@ interface AccountIconOption {
   icon: LucideIcon
 }
 
-const ACCOUNT_ICON_OPTIONS: AccountIconOption[] = [
+const ACCOUNT_ICON_OPTIONS: Array<AccountIconOption> = [
   { value: 'building-2', label: 'Bank', icon: Building2 },
   { value: 'wallet', label: 'Wallet', icon: Wallet },
   { value: 'banknote', label: 'Cash', icon: Banknote },
@@ -221,26 +221,6 @@ function AccountFormPage() {
         </form>
       </div>
     </AppLayout>
-  )
-}
-
-function AccountTypePreview({
-  selectedAccountType,
-}: {
-  selectedAccountType: {
-    type: AccountType
-    label: string
-    icon: LucideIcon
-  }
-}) {
-  const Icon = selectedAccountType.icon
-
-  return (
-    <div className="flex h-full min-h-[92px] w-full items-center justify-center rounded-xl p-1">
-      <div className="bg-primary/10 text-primary flex size-14 items-center justify-center rounded-xl md:size-16">
-        <Icon className="size-7 md:size-8" />
-      </div>
-    </div>
   )
 }
 

@@ -1,0 +1,27 @@
+{
+  "version": "7",
+  "dialect": "sqlite",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "6",
+      "when": 1774730484348,
+      "tag": "0000_absent_wild_child",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1774754100000,
+      "tag": "0001_better_auth_drizzle",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1774758000000,
+      "tag": "0002_user_scoped_data",
+      "breakpoints": true
+    }
+  ]
+}

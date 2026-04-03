@@ -1,22 +1,24 @@
+import { useNavigate } from '@tanstack/react-router'
+import { useEffect, useState } from 'react'
+import type {RequiredFormData} from '@/features/transactions/components/common-tx-input';
+import type {GroupPeopleMetadata} from '@/features/transactions/components/group-tx-form';
 import { FormSection } from '@/components/layout/form-section'
 import { Button } from '@/components/ui/button'
 import { FieldRow } from '@/components/ui/field-row'
 import { InputGroup, InputGroupInput } from '@/components/ui/input-group'
-import { Currency, CURRENCY_META } from '@/features/accounts/types'
+import { CURRENCY_META, Currency } from '@/features/accounts/types'
 import {
   AmountInput,
   DateInput,
-  type RequiredFormData,
-  TimeInput,
+  
+  TimeInput
 } from '@/features/transactions/components/common-tx-input'
 import {
   GroupPeopleInput,
-  type GroupPeopleMetadata,
-  UserSelect,
+  
+  UserSelect
 } from '@/features/transactions/components/group-tx-form'
 import { useCurrentUser } from '@/features/users/api'
-import { useNavigate } from '@tanstack/react-router'
-import { useEffect, useState } from 'react'
 
 interface TransferMetadata extends GroupPeopleMetadata {
   transferFromId: string
@@ -69,8 +71,7 @@ export function GroupTransferTxFormSection() {
       if (!transferFromId || !availableIds.has(transferFromId as never)) {
         transferFromId =
           metadata.members.find((person) => person.id === currentUser.id)?.id ??
-          metadata.members[0]?.id ??
-          ''
+          metadata.members[0].id
       }
 
       if (

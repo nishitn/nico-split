@@ -1,16 +1,16 @@
+import { useQuery, useSuspenseQuery } from '@tanstack/react-query'
 import type { User } from '@/features/users/types'
 import { api } from '@/lib/api'
-import { useQuery, useSuspenseQuery } from '@tanstack/react-query'
 
 export const keys = {
   users: 'users',
-  allUsers: 'allUsers',
+  friends: 'friends',
 }
 
-export const useUsers = () => {
+export const useFriends = () => {
   return useQuery({
-    queryKey: [keys.allUsers],
-    queryFn: () => api.getUsers(),
+    queryKey: [keys.friends],
+    queryFn: () => api.getFriends(),
   })
 }
 

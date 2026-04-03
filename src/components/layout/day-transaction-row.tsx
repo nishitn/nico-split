@@ -1,9 +1,9 @@
+import { Calendar } from 'lucide-react'
+import type { DayTransactionData } from '@/features/transactions/types'
+import type { User } from '@/features/users/types'
 import { TransactionItem } from '@/components/layout/transaction-item'
 import { CurrencySpan } from '@/components/ui/currency-span'
 import { Separator } from '@/components/ui/separator'
-import type { DayTransactionData } from '@/features/transactions/types'
-import type { User } from '@/features/users/types'
-import { Calendar } from 'lucide-react'
 
 export interface DayTransactionRowProps {
   user: User

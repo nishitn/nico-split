@@ -1,5 +1,9 @@
 import '@fontsource/roboto/500.css'
 
+import { createFileRoute } from '@tanstack/react-router'
+import { LoaderCircle, LockKeyhole } from 'lucide-react'
+import { useState } from 'react'
+import { z } from 'zod'
 import { getAuthState } from '../../backend/auth-session'
 import { Button } from '@/components/ui/button'
 import {
@@ -11,10 +15,6 @@ import {
 } from '@/components/ui/card'
 import { authClient } from '@/lib/auth-client'
 import { cn } from '@/lib/utils'
-import { createFileRoute } from '@tanstack/react-router'
-import { LoaderCircle, LockKeyhole } from 'lucide-react'
-import { useState } from 'react'
-import { z } from 'zod'
 
 const signInSearchSchema = z.object({
   redirect: z.string().optional(),

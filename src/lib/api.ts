@@ -1,9 +1,47 @@
+import type { Account, Currency } from '@/features/accounts/types'
+import type {
+  Category,
+  CategoryStat,
+  CategoryType,
+} from '@/features/categories/types'
+import type { Chapter } from '@/features/chapters/types'
+import type { Group, GroupBalance } from '@/features/groups/types'
+import type {
+  GroupSplitMetadata,
+  GroupTransactionType,
+  GroupTransferMetadata,
+  MonthlyStats,
+  PersonalTransactionType,
+  Transaction,
+} from '@/features/transactions/types'
+import { TransactionScope } from '@/features/transactions/types'
+import type { PeopleBalance, User } from '@/features/users/types'
+import { getIcon } from '@/lib/icon-map'
+import type { CategoryDto, CategoryStatDto } from 'backend/dto/category-dto'
+import type {
+  DatabaseTableDto,
+  DatabaseTablePreviewDto,
+} from 'backend/dto/database-dto'
+import type {
+  GroupBalanceDto,
+  GroupDto,
+  GroupSplitMetadataDto,
+} from 'backend/dto/group-dto'
+import type { PeopleBalanceDto } from 'backend/dto/people-balance-dto'
+import type {
+  GroupTransactionDto,
+  MonthlyStatsDto,
+  TransactionDto,
+} from 'backend/dto/transaction-dto'
+import type { AccountRecord, ChapterRecord, UserRecord } from 'backend/schema'
+import type { UUID } from 'node:crypto'
 import {
   getAccounts as getAccountsServer,
   getCategories as getCategoriesServer,
   getCategoryStats as getCategoryStatsServer,
   getChapters as getChaptersServer,
   getCurrentUser as getCurrentUserServer,
+  getFriends as getFriendsServer,
   getDatabaseTablePreview as getDatabaseTablePreviewServer,
   getDatabaseTables as getDatabaseTablesServer,
   getGroupBalances as getGroupBalancesServer,
@@ -13,57 +51,29 @@ import {
   getTransactions as getTransactionsServer,
   getUsers as getUsersServer,
 } from '../../backend/functions'
-import type {
-  AccountDto,
-  CategoryDto,
-  CategoryStatDto,
-  ChapterDto,
-  DatabaseTableDto,
-  DatabaseTablePreviewDto,
-  GroupBalanceDto,
-  GroupDto,
-  MonthlyStatsDto,
-  PeopleBalanceDto,
-  TransactionDto,
-  UserDto,
-} from '../../backend/contracts'
-import type { Account } from '@/features/accounts/types'
-import { AccountType, Currency } from '@/features/accounts/types'
-import type { Category, CategoryStat } from '@/features/categories/types'
-import { CategoryType } from '@/features/categories/types'
-import type { Chapter } from '@/features/chapters/types'
-import type { Group, GroupBalance } from '@/features/groups/types'
-import type {
-  GroupSplitMetadata,
-  GroupTransferMetadata,
-  MonthlyStats,
-  Transaction,
-} from '@/features/transactions/types'
-import {
-  GroupTransactionType,
-  PersonalTransactionType,
-  TransactionScope,
-} from '@/features/transactions/types'
-import type { PeopleBalance, User } from '@/features/users/types'
-import { getIcon } from '@/lib/icon-map'
-import type { UUID } from 'crypto'
 
 const asUuid = (value: string) => value as UUID
 
-function hydrateUser(user: UserDto): User {
+function isGroupSplitMetadataDto(
+  groupMetadata: GroupTransactionDto['groupMetadata'],
+): groupMetadata is GroupSplitMetadataDto {
+  return 'split' in groupMetadata
+}
+
+function hydrateUser(user: UserRecord): User {
   return {
     id: asUuid(user.id),
     name: user.name,
   }
 }
 
-function hydrateAccount(account: AccountDto): Account {
+function hydrateAccount(account: AccountRecord): Account {
   return {
     id: asUuid(account.id),
     label: account.label,
-    type: account.type as AccountType,
+    type: account.type,
     icon: getIcon(account.iconName),
-    currency: account.currency as Currency,
+    currency: account.currency,
     balance: account.balance,
   }
 }
@@ -78,7 +88,7 @@ function hydrateCategory(category: CategoryDto): Category {
   }
 }
 
-function hydrateChapter(chapter: ChapterDto): Chapter {
+function hydrateChapter(chapter: ChapterRecord): Chapter {
   return {
     id: asUuid(chapter.id),
     label: chapter.label,
@@ -144,19 +154,18 @@ function hydrateTransaction(transaction: TransactionDto): Transaction {
     group: hydrateGroup(transaction.group),
     scope: TransactionScope.GROUP,
     type: transaction.type as GroupTransactionType,
-    groupMetadata:
-      transaction.type === GroupTransactionType.SPLIT
-        ? ({
-            paidBy: transaction.groupMetadata.paidBy,
-            split: transaction.groupMetadata.split,
-            category: transaction.groupMetadata.category
-              ? hydrateCategory(transaction.groupMetadata.category)
-              : undefined,
-          } satisfies GroupSplitMetadata)
-        : ({
-            paidBy: hydrateUser(transaction.groupMetadata.paidBy),
-            paidTo: hydrateUser(transaction.groupMetadata.paidTo),
-          } satisfies GroupTransferMetadata),
+    groupMetadata: isGroupSplitMetadataDto(transaction.groupMetadata)
+      ? ({
+          paidBy: transaction.groupMetadata.paidBy,
+          split: transaction.groupMetadata.split,
+          category: transaction.groupMetadata.category
+            ? hydrateCategory(transaction.groupMetadata.category)
+            : undefined,
+        } satisfies GroupSplitMetadata)
+      : ({
+          paidBy: hydrateUser(transaction.groupMetadata.paidBy),
+          paidTo: hydrateUser(transaction.groupMetadata.paidTo),
+        } satisfies GroupTransferMetadata),
     userMetadata: {
       account: hydrateAccount(transaction.userMetadata.account),
       category: transaction.userMetadata.category
@@ -195,6 +204,10 @@ export const api = {
 
   getCurrentUser: async (): Promise<User> => {
     return hydrateUser(await getCurrentUserServer())
+  },
+
+  getFriends: async (): Promise<Array<User>> => {
+    return (await getFriendsServer()).map(hydrateUser)
   },
 
   getAccounts: async (): Promise<Array<Account>> => {

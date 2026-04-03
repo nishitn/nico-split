@@ -1,3 +1,13 @@
+import {
+  Outlet,
+  createFileRoute,
+  useChildMatches,
+  useNavigate,
+} from '@tanstack/react-router'
+import { useState } from 'react'
+import { z } from 'zod'
+import type { UUID } from 'node:crypto'
+import type { ReactNode } from 'react'
 import { AppLayout } from '@/components/layout/app-layout'
 import { CategoryRow } from '@/components/layout/category-row'
 import { RouteToolbar } from '@/components/layout/route-toolbar'
@@ -9,16 +19,6 @@ import { SummaryCell } from '@/components/ui/summary-cell'
 import { useCategoryStats } from '@/features/categories/api'
 import { useMonthlyStats } from '@/features/transactions/api'
 import { useCurrentUser } from '@/features/users/api'
-import {
-  createFileRoute,
-  Outlet,
-  useChildMatches,
-  useNavigate,
-} from '@tanstack/react-router'
-import type { UUID } from 'crypto'
-import type { ReactNode } from 'react'
-import { useState } from 'react'
-import { z } from 'zod'
 
 const searchSchema = z.object({
   month: z.number().min(1).max(12).optional(),
@@ -71,7 +71,7 @@ function CategoriesPage() {
     Record<UUID, boolean>
   >({})
 
-  if (childMatches.length > 0) {
+  if (childMatches.length) {
     return <Outlet />
   }
 
@@ -83,8 +83,6 @@ function CategoriesPage() {
   }
 
   // #endregion
-
-  if (!user) return <div className="flex justify-center p-8">Loading...</div>
 
   // Sort by amount (highest spend first)
   const sortedCategoryStats = categoryStats.sort(

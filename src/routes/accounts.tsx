@@ -1,3 +1,9 @@
+import {
+  Outlet,
+  createFileRoute,
+  useChildMatches,
+} from '@tanstack/react-router'
+import type { ReactNode } from 'react'
 import { AccountRow } from '@/components/layout/account-row'
 import { AppLayout } from '@/components/layout/app-layout'
 import { PeopleRow } from '@/components/layout/people-row'
@@ -9,12 +15,6 @@ import { SummaryCell } from '@/components/ui/summary-cell'
 import { useAccounts } from '@/features/accounts/api'
 import { useCurrentUser, usePeopleBalances } from '@/features/users/api'
 import { cn, getAmountsColor, getOwesColor, getOwesText } from '@/lib/utils'
-import {
-  createFileRoute,
-  Outlet,
-  useChildMatches,
-} from '@tanstack/react-router'
-import type { ReactNode } from 'react'
 
 export const Route = createFileRoute('/accounts')({
   component: AccountsPage,

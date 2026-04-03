@@ -1,3 +1,5 @@
+import { Calendar, ChevronLeft, ChevronRight } from 'lucide-react'
+import { useEffect, useState } from 'react'
 import {
   Popover,
   PopoverContent,
@@ -5,8 +7,6 @@ import {
 } from '@/components/ui/popover'
 import { Separator } from '@/components/ui/separator'
 import { cn } from '@/lib/utils'
-import { Calendar, ChevronLeft, ChevronRight } from 'lucide-react'
-import { useEffect, useState } from 'react'
 
 export interface MonthNavigatorProps {
   currentMonth: number

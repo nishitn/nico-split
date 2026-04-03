@@ -1,3 +1,11 @@
+import {
+  Outlet,
+  createFileRoute,
+  useChildMatches,
+  useNavigate,
+} from '@tanstack/react-router'
+import { z } from 'zod'
+import type { ReactNode } from 'react'
 import { AppLayout } from '@/components/layout/app-layout'
 import { GroupRow } from '@/components/layout/group-row'
 import { RouteToolbar } from '@/components/layout/route-toolbar'
@@ -9,14 +17,6 @@ import { SummaryCell } from '@/components/ui/summary-cell'
 import { useGroupBalances } from '@/features/groups/api'
 import { useCurrentUser } from '@/features/users/api'
 import { cn, getOwesColor, getOwesText } from '@/lib/utils'
-import {
-  Outlet,
-  createFileRoute,
-  useChildMatches,
-  useNavigate,
-} from '@tanstack/react-router'
-import type { ReactNode } from 'react'
-import { z } from 'zod'
 
 const groupsSearchSchema = z.object({
   month: z.number().min(1).max(12).optional(),
@@ -59,11 +59,9 @@ function GroupsPage() {
 
   // #endregion
 
-  if (childMatches.length > 0) {
+  if (childMatches.length) {
     return <Outlet />
   }
-
-  if (!user) return <div className="flex justify-center p-8">Loading...</div>
 
   // #region Calculate totals
   const totalMonthlyOwes = groupBalances.reduce((acc, gb) => {
